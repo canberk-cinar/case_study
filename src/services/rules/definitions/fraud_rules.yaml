@@ -1,4 +1,4 @@
-# Adım 7 — canonical fraud/anomaly rule set (10 rules), explicit if-then structure.
+# Case 7 — canonical fraud/anomaly rule set (10 rules), explicit if-then structure.
 #
 # Every numeric threshold below was grounded against the real dataset's own percentiles before
 # being written here (verified in notebooks/case_07_rule_engine.ipynb) — none were guessed, and

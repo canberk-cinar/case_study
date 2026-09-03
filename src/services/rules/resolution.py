@@ -1,4 +1,4 @@
-"""Adım 7 — Chain of Responsibility: reduces a ROW's set of already-fired rules down to one final
+"""Case 7 — Chain of Responsibility: reduces a ROW's set of already-fired rules down to one final
 verdict. This is deliberately the ONLY place in the engine that short-circuits — rule evaluation
 itself (engine.py) stays exhaustive over every rule so explainability can report everything that
 fired; only the final-verdict step chains through handlers and stops at the first one that

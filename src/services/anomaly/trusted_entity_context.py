@@ -1,4 +1,4 @@
-"""Case 6, Madde 3 — trusted entity adjustment.
+"""Case 6, Item 3 — trusted entity adjustment.
 
 Empirical check first (see notebook): does a card's (`card1`, Case 3's entity identifier) own
 transaction history depth (`user_transaction_count_so_far`, causal — only prior transactions

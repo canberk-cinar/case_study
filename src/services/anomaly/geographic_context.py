@@ -1,4 +1,4 @@
-"""Case 6, Madde 4 — geographic risk adjustment.
+"""Case 6, Item 4 — geographic risk adjustment.
 
 Empirical check first (see notebook): `addr2` (billing region/country code) is ~99.2% a single
 value (87 — the dominant/home region in this dataset), making "foreign" (addr2 present and != 87)

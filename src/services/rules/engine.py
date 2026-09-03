@@ -1,4 +1,4 @@
-"""Adım 7 — RuleEngine: evaluates every enabled rule against a DataFrame at once (vectorized,
+"""Case 7 — RuleEngine: evaluates every enabled rule against a DataFrame at once (vectorized,
 Series[bool] per rule — no row-by-row Python loop for the actual condition checks, consistent with
 the rest of this project), then reduces each row's fired-rule set to one verdict.
 

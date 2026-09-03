@@ -1,4 +1,4 @@
-"""Case 6, Madde 1 — business hours context: reweights Case 5's final_raw_anomaly_score based on
+"""Case 6, Item 1 — business hours context: reweights Case 5's final_raw_anomaly_score based on
 whether a transaction occurred during standard business hours, using two DIFFERENT and
 DELIBERATELY CONTRASTED principles rather than picking one:
 

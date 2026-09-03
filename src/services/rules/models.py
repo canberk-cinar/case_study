@@ -1,4 +1,4 @@
-"""Adım 7 — data model for a configurable fraud rule, structured explicitly as if/then.
+"""Case 7 — data model for a configurable fraud rule, structured explicitly as if/then.
 
 A Rule pairs an `if` (a Condition tree — see conditions.py, Composite pattern: AllOf/AnyOf/Not
 nesting of atomic field/operator/value checks) with a `then` consequence: an Action (what the

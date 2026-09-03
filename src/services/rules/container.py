@@ -1,4 +1,4 @@
-"""Adım 7 — the project's first actual use of `dependency_injector` (it has been a listed
+"""Case 7 — the project's first actual use of `dependency_injector` (it has been a listed
 dependency since early in this project but never wired up anywhere until now). Deliberately
 narrow and single-purpose: one Container wiring the rules-file path -> RuleLoader -> parsed
 Rule list -> resolution chain -> RuleEngine, so swapping which rules file is active (e.g. the

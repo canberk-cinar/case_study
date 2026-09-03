@@ -1,4 +1,4 @@
-"""Case 6, Madde 2 — weekend adjustment.
+"""Case 6, Item 2 — weekend adjustment.
 
 Confound check done first (see notebook): is a weekend effect real, or just business_context.py's
 hour-of-day effect resurfacing under a different name? Restricted to 09:00-18:00 only — weekday

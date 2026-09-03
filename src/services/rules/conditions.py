@@ -1,4 +1,4 @@
-"""Adım 7 — Composite pattern: a rule's condition is a tree of Condition nodes that all share one
+"""Case 7 — Composite pattern: a rule's condition is a tree of Condition nodes that all share one
 interface (`evaluate(df) -> pd.Series[bool]`), so a caller never needs to know whether it's holding
 one atomic field check or an arbitrarily nested AND/OR/NOT combination of them — it just calls
 `.evaluate(df)`. AtomicCondition is the leaf (a single field/operator/value check, delegating the

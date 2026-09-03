@@ -1,9 +1,9 @@
 """Case 4 — assembling all four anomaly layers into one table, scores kept explicitly separate.
 
-The case brief's own instruction: "farklı anomali skorlarını ayrı ayrı üretiniz" (produce the
-different anomaly scores separately) — not one master score. Collapsing four independent
-perspectives into a single number would defeat the point of building them independently in the
-first place (the case brief's own "tek modele bağlı kalmadan" principle) — a downstream consumer
+The case brief's own instruction: "produce the different anomaly scores separately" — not one
+master score. Collapsing four independent perspectives into a single number would defeat the point
+of building them independently in the first place (the case brief's own "without relying on a
+single model" principle) — a downstream consumer
 (a human reviewer, a rule engine, a supervised model trained later) should see all four views and
 decide for itself how to weigh them, rather than this pipeline making that call.
 
