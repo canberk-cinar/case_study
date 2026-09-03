@@ -2,11 +2,18 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from src.config import settings
+from src.config import REPO_ROOT, settings
 
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = settings.DATABASE_URL
+
+if DATABASE_URL.startswith("sqlite:///./"):
+    # A relative sqlite path resolves against the process's cwd, not the repo root — wrong
+    # whenever something runs from elsewhere (a notebook's kernel cwd is its own directory, not
+    # the repo root). Anchor it explicitly, the same way config.py anchors every other path.
+    db_filename = DATABASE_URL.removeprefix("sqlite:///./")
+    DATABASE_URL = f"sqlite:///{REPO_ROOT / db_filename}"
 
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
