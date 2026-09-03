@@ -130,7 +130,7 @@ def check_value_consistency(parquet_path: Path) -> pd.DataFrame:
     dt = pf.read(columns=["TransactionDT"]).to_pandas()["TransactionDT"]
     decreasing = int((dt.diff().dropna() < 0).sum())
     findings.append({
-        "check": "TransactionDT satır sırasına göre azalıyor",
+        "check": "TransactionDT decreases row over row",
         "violation_count": decreasing,
         "violation_pct": decreasing / num_rows * 100,
     })
@@ -257,19 +257,19 @@ def run() -> dict:
 
     scorecard = build_quality_scorecard(dup_rows, dup_ids, consistency, text_consistency, outliers, num_rows)
 
-    print("=== Tekrarlı satırlar ===")
+    print("=== Duplicate rows ===")
     print(dup_rows)
-    print("\n=== Tekrarlı TransactionID ===")
+    print("\n=== Duplicate TransactionID ===")
     print(dup_ids)
-    print(f"\n=== Kopya kolon çiftleri ({len(dup_cols)} çift) ===")
+    print(f"\n=== Duplicate column pairs ({len(dup_cols)} pairs) ===")
     print(dup_cols.to_string(index=False))
-    print("\n=== Tutarlılık kontrolleri ===")
+    print("\n=== Consistency checks ===")
     print(consistency.to_string(index=False))
-    print("\n=== Aykırı değer oranı — en yüksek 10 kolon ===")
+    print("\n=== Outlier ratio — top 10 columns ===")
     print(outliers.head(10).to_string(index=False))
-    print(f"\n=== Metin tutarsızlıkları ({len(text_consistency)} kolon etkilendi) ===")
+    print(f"\n=== Text inconsistencies ({len(text_consistency)} columns affected) ===")
     print(text_consistency.to_string(index=False))
-    print("\n=== Kalite skor kartı ===")
+    print("\n=== Quality scorecard ===")
     for key, value in scorecard.items():
         print(f"{key}: {value}")
 

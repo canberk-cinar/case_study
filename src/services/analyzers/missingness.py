@@ -135,19 +135,19 @@ def run() -> None:
     patterns, row_null_counts = analyze_missing_patterns(parquet_path)
     row_summary = summarize_row_missingness(row_null_counts)
 
-    print("=== Kolon başına eksik oranı kovaları ===")
+    print("=== Missing-ratio buckets per column ===")
     print(ratios["bucket"].value_counts().to_string())
 
-    print("\n=== En yüksek eksik oranına sahip 15 kolon ===")
+    print("\n=== Top 15 columns by missing ratio ===")
     print(ratios.head(15).to_string(index=False))
 
-    print(f"\n=== Eksiklik deseni grupları ({len(patterns)} grup, 2+ kolon paylaşıyor) ===")
+    print(f"\n=== Missingness pattern groups ({len(patterns)} groups, 2+ columns sharing a pattern) ===")
     for _, row in patterns.iterrows():
-        marker = "YAPISAL (join kaynaklı)" if row["likely_structural"] else "incelenmeli"
+        marker = "STRUCTURAL (join-driven)" if row["likely_structural"] else "needs review"
         sample = row["columns"][:5]
         more = "..." if row["column_count"] > 5 else ""
-        print(f"[{marker}] {row['column_count']} kolon, %{row['missing_ratio']*100:.2f} eksik: {sample}{more}")
+        print(f"[{marker}] {row['column_count']} columns, {row['missing_ratio']*100:.2f}% missing: {sample}{more}")
 
-    print("\n=== Satır bazında eksiklik özeti ===")
+    print("\n=== Row-level missingness summary ===")
     for key, value in row_summary.items():
         print(f"{key}: {value}")

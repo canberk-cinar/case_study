@@ -59,13 +59,13 @@ def run() -> dict:
     freq = compute_combination_frequencies(parquet_path)
     unobserved = find_unobserved_combinations(parquet_path)
 
-    print(f"=== Kombinasyon uzayı: {len(freq)} gözlenen / olası {freq.shape[0] + len(unobserved)} ===")
+    print(f"=== Combination space: {len(freq)} observed / {freq.shape[0] + len(unobserved)} possible ===")
     print(freq.to_string(index=False))
 
-    print(f"\n=== Nadir kombinasyonlar ({int(freq['is_rare'].sum())} adet) ===")
+    print(f"\n=== Rare combinations ({int(freq['is_rare'].sum())}) ===")
     print(freq[freq["is_rare"]].to_string(index=False))
 
-    print(f"\n=== Hiç gözlenmemiş kombinasyonlar ({len(unobserved)} adet) ===")
+    print(f"\n=== Never-observed combinations ({len(unobserved)}) ===")
     print(unobserved.to_string(index=False))
 
     return {"frequencies": freq, "unobserved": unobserved}

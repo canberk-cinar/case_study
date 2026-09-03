@@ -65,24 +65,24 @@ def recommend_encoding(row: pd.Series) -> str:
     is_quasi_id = row["is_quasi_identifier"]
 
     if semantic_type in NOT_APPLICABLE_TYPES:
-        return "n/a — ayrı ele alınıyor (identifier/target/timestamp)"
+        return "n/a — handled separately (identifier/target/timestamp)"
 
     if name in ENTITY_KEY_COLUMN_HINTS:
-        return "varlık anahtarı olarak koru"
+        return "preserve as entity key"
 
     if semantic_type in CONTINUOUS_TYPES:
         if is_quasi_id:
-            return "incelenmeli — sürekli değişken ama neredeyse benzersiz, olası sızıntı/gürültü"
-        return "n/a — sürekli sayısal, kodlama gerekmez"
+            return "needs review — continuous but near-unique, possible leakage/noise"
+        return "n/a — continuous numeric, no encoding needed"
 
     # remaining: categorical-like columns not already caught by the entity-key hint list
     if is_quasi_id:
-        return "düşür — neredeyse her satırda benzersiz, genelleşmeyecek"
+        return "drop — near-unique per row, won't generalize"
     if tier in ("binary", "low", "medium"):
         return "one-hot"
     if tier == "high":
-        return "frekans kodlama"
-    return "hashing veya varlık anahtarı adayı — elle incelenmeli"  # very_high, not in hint list
+        return "frequency encoding"
+    return "hashing or entity-key candidate — needs manual review"  # very_high, not in hint list
 
 
 def compute_cardinality(classified: pd.DataFrame) -> pd.DataFrame:
@@ -102,17 +102,17 @@ def run() -> pd.DataFrame:
     classified = classify_columns(profile)
     cardinality = compute_cardinality(classified)
 
-    print("=== Cardinality kademesi dağılımı ===")
+    print("=== Cardinality tier distribution ===")
     print(cardinality["cardinality_tier"].value_counts().to_string())
 
-    print("\n=== Kodlama önerisi dağılımı ===")
+    print("\n=== Encoding recommendation distribution ===")
     print(cardinality["encoding_recommendation"].value_counts().to_string())
 
-    print("\n=== Varlık anahtarı olarak korunacak kolonlar ===")
-    entity_keys = cardinality[cardinality["encoding_recommendation"] == "varlık anahtarı olarak koru"]
+    print("\n=== Columns preserved as entity keys ===")
+    entity_keys = cardinality[cardinality["encoding_recommendation"] == "preserve as entity key"]
     print(entity_keys.to_string(index=False))
 
-    print("\n=== Quasi-identifier'lar (unique_ratio > 0.9) ===")
+    print("\n=== Quasi-identifiers (unique_ratio > 0.9) ===")
     print(cardinality[cardinality["is_quasi_identifier"]].to_string(index=False))
 
     return cardinality

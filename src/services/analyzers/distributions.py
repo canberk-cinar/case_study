@@ -163,16 +163,16 @@ def run() -> dict:
     categorical_dist = compute_categorical_distributions(parquet_path, categorical_cols)
     daily, hourly = analyze_time_distribution(parquet_path)
 
-    print(f"=== Sayısal dağılımlar ({len(numeric_dist)} kolon) — en çarpık 10 ===")
+    print(f"=== Numeric distributions ({len(numeric_dist)} columns) — top 10 most skewed ===")
     print(numeric_dist.head(10)[["column", "skewness", "kurtosis", "zero_ratio", "log_transform_recommended"]].to_string(index=False))
 
-    print(f"\n=== Kategorik dağılımlar ({len(categorical_dist)} kolon) — en dengesiz 10 (düşük normalize entropi) ===")
+    print(f"\n=== Categorical distributions ({len(categorical_dist)} columns) — top 10 most imbalanced (lowest normalized entropy) ===")
     print(categorical_dist.head(10)[["column", "nunique", "normalized_entropy", "imbalance_ratio"]].to_string(index=False))
 
-    print("\n=== Günlük hacim/tutar/fraud oranı (ilk 5 gün) ===")
+    print("\n=== Daily volume/amount/fraud rate (first 5 days) ===")
     print(daily.head().to_string(index=False))
 
-    print("\n=== Saatlik hacim/tutar/fraud oranı ===")
+    print("\n=== Hourly volume/amount/fraud rate ===")
     print(hourly.to_string(index=False))
 
     return {

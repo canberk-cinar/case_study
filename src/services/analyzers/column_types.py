@@ -141,10 +141,10 @@ def run() -> pd.DataFrame:
     profile = profile_columns(parquet_path)
     classified = classify_columns(profile)
 
-    print("=== Semantik tip dağılımı ===")
+    print("=== Semantic type distribution ===")
     print(classified["semantic_type"].value_counts().to_string())
 
-    print("\n=== Domain hint'in istatistiksel tahmini değiştirdiği kolonlar ===")
+    print("\n=== Columns where a domain hint overrode the statistical guess ===")
     changed = classified[classified["statistical_type"] != classified["semantic_type"]]
     print(changed[["column", "statistical_type", "semantic_type"]].to_string(index=False))
 
