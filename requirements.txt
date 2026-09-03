@@ -9,6 +9,7 @@ alembic
 pandas
 pyarrow
 numpy
+scikit-learn
 typer
 matplotlib
 jupyter
