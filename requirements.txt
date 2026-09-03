@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+dependency-injector
+sqlalchemy
+alembic
+pandas
+pyarrow
+numpy
+typer
+matplotlib
+jupyter
+pytest
+httpx
+anyio
