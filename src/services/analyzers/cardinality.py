@@ -116,10 +116,3 @@ def run() -> pd.DataFrame:
     print(cardinality[cardinality["is_quasi_identifier"]].to_string(index=False))
 
     return cardinality
-
-
-if __name__ == "__main__":
-    from src.config import configure_logging
-
-    configure_logging()
-    run()

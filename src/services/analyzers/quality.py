@@ -282,10 +282,3 @@ def run() -> dict:
         "text_consistency": text_consistency,
         "scorecard": scorecard,
     }
-
-
-if __name__ == "__main__":
-    from src.config import configure_logging
-
-    configure_logging()
-    run()

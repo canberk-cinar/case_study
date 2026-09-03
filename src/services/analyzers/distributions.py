@@ -181,10 +181,3 @@ def run() -> dict:
         "daily": daily,
         "hourly": hourly,
     }
-
-
-if __name__ == "__main__":
-    from src.config import configure_logging
-
-    configure_logging()
-    run()

@@ -151,10 +151,3 @@ def run() -> None:
     print("\n=== Satır bazında eksiklik özeti ===")
     for key, value in row_summary.items():
         print(f"{key}: {value}")
-
-
-if __name__ == "__main__":
-    from src.config import configure_logging
-
-    configure_logging()
-    run()

@@ -149,10 +149,3 @@ def run() -> pd.DataFrame:
     print(changed[["column", "statistical_type", "semantic_type"]].to_string(index=False))
 
     return classified
-
-
-if __name__ == "__main__":
-    from src.config import configure_logging
-
-    configure_logging()
-    run()
