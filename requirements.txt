@@ -8,6 +8,7 @@ sqlalchemy
 alembic
 pandas
 pyarrow
+pyyaml
 numpy
 scikit-learn
 typer

@@ -1,0 +1,208 @@
+# Adım 7 — canonical fraud/anomaly rule set (10 rules), explicit if-then structure.
+#
+# Every numeric threshold below was grounded against the real dataset's own percentiles before
+# being written here (verified in notebooks/case_07_rule_engine.ipynb) — none were guessed, and
+# none were tuned against isFraud. Two amount thresholds appear on purpose, not by oversight:
+# ELEVATED (~median, 70.0) is used only in rule fraud_r01, where it's already combined with two
+# other rare conditions (foreign country, night hour) so a lower bar still yields a specific rule;
+# HIGH (~p95, 445.0) is used standalone/near-standalone in rules that need a genuinely unusual
+# amount on their own to mean anything.
+#
+# `then.severity` reflects operational/domain risk judgment (how dangerous this PATTERN is, by
+# common fraud-industry reasoning), not this dataset's measured fraud rate for each rule — that
+# would risk tuning a "business rule" to one historical sample. `then.action` is the explicit
+# if-then consequence (BLOCK/REVIEW/FLAG) — a separate axis from severity: two rules can share a
+# severity but warrant a different action. The notebook validates each rule's real-world alignment
+# AFTER the fact (isFraud used only for that descriptive check), and reports the results honestly
+# even where a rule's measured effect is weaker than its assigned severity would suggest
+# (fraud_r09 in particular).
+rules:
+  - id: fraud_r01
+    name: "High Amount + Foreign Country + Night"
+    priority: 1
+    if:
+      all_of:
+        - field: TransactionAmt
+          operator: gt
+          value: 70.0
+        - field: addr2
+          operator: is_null
+          value: false
+        - field: addr2
+          operator: ne
+          value: 87.0
+        - field: is_low_volume_hour
+          operator: eq
+          value: true
+    then:
+      action: BLOCK
+      severity: CRITICAL
+      description: >-
+        Elevated amount ({TransactionAmt}) combined with a foreign billing region (addr2={addr2})
+        during a historically low-volume, high-fraud-rate hour window (04:00-09:00) — the exact
+        combination named as an example in the case brief.
+
+  - id: fraud_r02
+    name: "Velocity — Rapid Repeat Transaction"
+    priority: 2
+    if:
+      field: user_seconds_since_last_transaction
+      operator: lt
+      value: 60
+    then:
+      action: REVIEW
+      severity: HIGH
+      description: >-
+        Only {user_seconds_since_last_transaction} seconds since this card's last transaction —
+        classic card-testing / automated-fraud velocity signal.
+
+  - id: fraud_r03
+    name: "New Device + New Address Together"
+    priority: 3
+    if:
+      all_of:
+        - field: is_new_device_for_card
+          operator: eq
+          value: true
+        - field: is_new_addr1_for_card
+          operator: eq
+          value: true
+    then:
+      action: REVIEW
+      severity: HIGH
+      description: >-
+        Both the device and the billing address are new for this card in the same transaction —
+        a common account-takeover signature (is_new_device_for_card={is_new_device_for_card},
+        is_new_addr1_for_card={is_new_addr1_for_card}).
+
+  - id: fraud_r04
+    name: "Extreme Deviation From Card's Own Spending"
+    priority: 4
+    if:
+      any_of:
+        - field: user_amount_zscore
+          operator: gt
+          value: 3
+        - field: user_amount_zscore
+          operator: lt
+          value: -3
+    then:
+      action: REVIEW
+      severity: HIGH
+      description: >-
+        Amount z-score {user_amount_zscore} is more than 3 standard deviations from this card's
+        own historical average — statistically extreme even relative to its own past behavior,
+        not the global population.
+
+  - id: fraud_r05
+    name: "Brand-New Card, High-Value First Transaction"
+    priority: 5
+    if:
+      all_of:
+        - field: user_transaction_count_so_far
+          operator: eq
+          value: 0
+        - field: TransactionAmt
+          operator: gt
+          value: 445.0
+    then:
+      action: BLOCK
+      severity: CRITICAL
+      description: >-
+        This card's very first observed transaction ({user_transaction_count_so_far} prior
+        transactions) is already for {TransactionAmt} — no track record to justify the amount.
+
+  - id: fraud_r06
+    name: "Weekend Off-Hours High-Value"
+    priority: 6
+    if:
+      all_of:
+        - field: is_weekend_proxy
+          operator: eq
+          value: true
+        - field: is_low_volume_hour
+          operator: eq
+          value: true
+        - field: TransactionAmt
+          operator: gt
+          value: 445.0
+    then:
+      action: FLAG
+      severity: MEDIUM
+      description: >-
+        High-value transaction ({TransactionAmt}) on a weekend during the historically low-volume
+        hour window — an unusual combination of context signals.
+
+  - id: fraud_r07
+    name: "AI Anomaly Score — Extreme Tail"
+    priority: 7
+    if:
+      field: final_raw_anomaly_score
+      operator: gte
+      value: 0.9410418735356755
+    then:
+      action: REVIEW
+      severity: HIGH
+      description: >-
+        final_raw_anomaly_score={final_raw_anomaly_score} is in the top 1% of the whole
+        statistical anomaly-detection pipeline (Cases 4-5) — the explicit bridge between the
+        AI-based scoring system and this rule engine.
+
+  - id: fraud_r08
+    name: "Generic/Missing Device Info + High Amount"
+    priority: 8
+    if:
+      all_of:
+        - any_of:
+            - field: DeviceInfo
+              operator: is_null
+              value: true
+            - field: DeviceInfo
+              operator: in
+              value: ["Windows", "iOS Device", "MacOS", "Trident/7.0"]
+        - field: TransactionAmt
+          operator: gt
+          value: 445.0
+    then:
+      action: FLAG
+      severity: MEDIUM
+      description: >-
+        High-value transaction ({TransactionAmt}) from a device fingerprint that's either missing
+        or a generic OS-level label (DeviceInfo={DeviceInfo}) rather than a specific device model.
+
+  - id: fraud_r09
+    name: "Address-Hopping Velocity"
+    priority: 9
+    if:
+      all_of:
+        - field: is_new_addr1_for_card
+          operator: eq
+          value: true
+        - field: user_seconds_since_last_transaction
+          operator: lt
+          value: 300
+    then:
+      action: BLOCK
+      severity: CRITICAL
+      description: >-
+        A brand-new billing address for this card, used again within
+        {user_seconds_since_last_transaction} seconds — the address-hopping pattern common to
+        fraud rings testing stolen card numbers against multiple drop addresses.
+
+  - id: fraud_r10
+    name: "Unusually Large Physical Distance"
+    priority: 10
+    if:
+      all_of:
+        - field: dist1
+          operator: is_null
+          value: false
+        - field: dist1
+          operator: gt
+          value: 846.0
+    then:
+      action: FLAG
+      severity: LOW
+      description: >-
+        dist1={dist1} is in the top 5% of measured distances in this dataset — a large mismatch
+        between billing and transaction location.

@@ -1,0 +1,50 @@
+{
+  "rules": [
+    {
+      "id": "example_json_01",
+      "name": "High Amount (JSON example)",
+      "priority": 1,
+      "if": {
+        "field": "TransactionAmt",
+        "operator": "gt",
+        "value": 445.0
+      },
+      "then": {
+        "action": "FLAG",
+        "severity": "MEDIUM",
+        "description": "Amount {TransactionAmt} exceeds the standalone high-amount threshold."
+      }
+    },
+    {
+      "id": "example_json_02",
+      "name": "New Device Only (JSON example)",
+      "priority": 2,
+      "if": {
+        "field": "is_new_device_for_card",
+        "operator": "eq",
+        "value": true
+      },
+      "then": {
+        "action": "FLAG",
+        "severity": "LOW",
+        "description": "A new device for this card ({is_new_device_for_card}), on its own."
+      }
+    },
+    {
+      "id": "example_json_03",
+      "name": "New Device Or New Address (JSON example)",
+      "priority": 3,
+      "if": {
+        "any_of": [
+          {"field": "is_new_device_for_card", "operator": "eq", "value": true},
+          {"field": "is_new_addr1_for_card", "operator": "eq", "value": true}
+        ]
+      },
+      "then": {
+        "action": "REVIEW",
+        "severity": "HIGH",
+        "description": "Either the device or the address is new for this card — a looser any_of version of fraud_r03."
+      }
+    }
+  ]
+}
