@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_MODEL: str = ""
 
+    # Case 8's embedding side — a separate model id from LLM_MODEL (OpenRouter's embedding and
+    # chat models are different endpoints/slugs) but the SAME key/base_url, so no separate
+    # EMBEDDING_API_KEY. Default is the free NVIDIA Nemotron 3 Embed 1B — chosen for retrieval
+    # quality (72.38 on RTEB) over LiquidAI's faster-but-smaller LFM2.5-Embedding-350M, since our
+    # remaining retrieval gap (multi-concept query dilution, see case_08 notebook) needs better
+    # semantic ranking, not lower latency at our knowledge base's tiny (~15-chunk) scale.
+    EMBEDDING_MODEL: str = "nvidia/nemotron-3-embed-1b:free"
+
     @property
     def raw_data_path(self) -> Path:
         return REPO_ROOT / self.RAW_DATA_DIR

@@ -12,10 +12,15 @@ must never be mixed in one vector_search.py index (models.py's `embedding_model`
 stored chunk exists specifically to prevent that).
 
 OllamaEmbeddingProvider calls Ollama's local REST API directly via httpx (already a project
-dependency) — no new dependency needed, no `ollama` PyPI package required. An OpenRouter-backed
-provider could be added the same way (implementing this same ABC) if a paid/hosted fallback were
-ever wanted, but isn't implemented here — no API key, and the brief's whole point for this case is
-running fully local.
+dependency) — no new dependency needed, no `ollama` PyPI package required.
+
+OpenRouterEmbeddingProvider calls OpenRouter's OpenAI-compatible `/embeddings` endpoint the same
+httpx-only way — added once the case study team approved OpenRouter as this machine's local-Ollama
+stand-in (Case 9's RAM constraint) and OpenRouter's free embedding tier (NVIDIA Nemotron 3 Embed
+1B, chosen over LiquidAI's LFM2.5-Embedding-350M for retrieval quality — see
+notebooks/case_08_rag_pipeline.ipynb's multi-concept-query finding) became available. TF-IDF
+remains the default/fallback (config.py's DEFAULT_CONFIG) — this provider is opt-in via
+`embedding_provider: openrouter` in RAGContainer's config.
 """
 from abc import ABC, abstractmethod
 
@@ -24,6 +29,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434"
+OPENROUTER_DEFAULT_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 class EmbeddingProvider(ABC):
@@ -86,6 +92,34 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
 
     def embed_query(self, text: str) -> np.ndarray:
         return self._embed_one(text)
+
+
+class OpenRouterEmbeddingProvider(EmbeddingProvider):
+    def __init__(self, model: str, api_key: str, base_url: str = OPENROUTER_DEFAULT_BASE_URL):
+        self.model = model
+        self.api_key = api_key
+        self.base_url = base_url
+
+    @property
+    def name(self) -> str:
+        return f"openrouter:{self.model}"
+
+    def _embed(self, texts: list[str]) -> np.ndarray:
+        response = httpx.post(
+            f"{self.base_url}/embeddings",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={"model": self.model, "input": texts},
+            timeout=60.0,
+        )
+        response.raise_for_status()
+        data = sorted(response.json()["data"], key=lambda row: row["index"])
+        return np.array([row["embedding"] for row in data], dtype=np.float32)
+
+    def embed_documents(self, texts: list[str]) -> np.ndarray:
+        return self._embed(texts)
+
+    def embed_query(self, text: str) -> np.ndarray:
+        return self._embed([text])[0]
 
 
 def ollama_is_running(base_url: str = OLLAMA_DEFAULT_BASE_URL) -> bool:

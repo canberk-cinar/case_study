@@ -1,6 +1,8 @@
 """Case 8 — RAGPipeline: Facade over chunking, embedding, storage, vector search, prompt-building,
 and generation — three methods hide the whole multi-step flow:
-  - ingest(db, documents): chunk -> embed -> persist.
+  - ingest(db, documents): chunk -> embed -> persist. Cannot degrade gracefully like answer() —
+    retrieval is impossible without embeddings — so an unreachable/unauthorized embedding
+    provider raises RuntimeError with a clear cause instead of a raw httpx exception.
   - answer(db, question): retrieve -> inject context into a prompt -> generate. Degrades
     gracefully (never raises) if the LLM provider is unreachable — returns the retrieval +
     constructed prompt with `answer=None` and an explanatory `note`, so retrieval and context
@@ -49,7 +51,14 @@ class RAGPipeline:
         all_texts = [text for _, chunks in pending for text in chunks]
         if not all_texts:
             return 0
-        embeddings = self.embedding_provider.embed_documents(all_texts)
+        try:
+            embeddings = self.embedding_provider.embed_documents(all_texts)
+        except httpx.HTTPError as exc:
+            raise RuntimeError(
+                f"Embedding generation failed ({self.embedding_provider.name}): {exc} — check "
+                "LLM_API_KEY in .env and network access, then retry ingest(). Unlike answer(), "
+                "ingest() cannot degrade gracefully: retrieval is impossible without embeddings."
+            ) from exc
 
         cursor = 0
         for document_id, chunks in pending:
