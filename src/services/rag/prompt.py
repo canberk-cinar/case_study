@@ -3,17 +3,19 @@
 order, then finalized with .build() — this IS "LLM context injection": the retrieved chunks'
 actual text gets woven into the prompt the model will see, with explicit source numbering so a
 generated answer can point back to which policy document supported it.
+
+The default system instructions are a static asset (static/system_prompt.json), not a hardcoded
+Python string — this is RAG's own general-purpose prompt (any caller of RAGPipeline uses it, not
+just Case 9's policy_explanation agent), so it lives here rather than under any one agent's folder.
 """
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 
-from src.services.rag.models import RetrievedChunk
+from src.services.rag.domain.models import RetrievedChunk
 
-DEFAULT_SYSTEM_INSTRUCTIONS = (
-    "You are a policy assistant for a fraud/anomaly detection system. Answer using ONLY the "
-    "source texts given below. Do not invent anything not present in the sources; if the sources "
-    "don't cover the question, say so explicitly. Cite which source(s) you relied on using "
-    "numbers like [1], [2]."
-)
+_STATIC_DIR = Path(__file__).parent / "static"
+DEFAULT_SYSTEM_INSTRUCTIONS = json.loads((_STATIC_DIR / "system_prompt.json").read_text())["system_instructions"]
 
 
 @dataclass

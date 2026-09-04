@@ -26,7 +26,7 @@ from pathlib import Path
 import yaml
 
 from src.services.rules.conditions import AtomicCondition, Condition, CompositeCondition, NotCondition
-from src.services.rules.models import Action, Rule, Severity
+from src.services.rules.domain.models import Action, Rule, Severity
 
 
 def _build_condition(spec: dict) -> Condition:

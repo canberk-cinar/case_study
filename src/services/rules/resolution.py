@@ -21,7 +21,7 @@ breaker nobody can see the effect of.
 """
 from dataclasses import dataclass
 
-from src.services.rules.models import Rule, Severity
+from src.services.rules.domain.models import Rule, Severity
 
 
 @dataclass(frozen=True)

@@ -4,6 +4,8 @@ startup, expose /healthz, include routers. Auth/rate-limiting/scheduler middlewa
 reference are deliberately not carried over — this is a single-user case-study demo API, not a
 multi-tenant production service.
 """
+from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,22 +24,22 @@ from src.container import build_container  # noqa: E402
 from src.database.db import run_migrations  # noqa: E402
 from src.routes import agent, anomaly, explainability, rag, rules  # noqa: E402
 
-app = FastAPI(title="Fraud/Anomaly Detection Platform API")
-
 container = build_container()
-app.state.container = container
-container.wire(modules=[
-    "src.routes.rules",
-    "src.routes.explainability",
-    "src.routes.rag",
-])
+# ApiContainer.wiring_config already lists every route module that uses Provide[...] — container
+# construction wires them automatically, so there is no separate container.wire(modules=[...])
+# call here to keep in sync by hand (verified: removing it does not break DI resolution).
 
 
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     logger.info("Starting Fraud/Anomaly Detection Platform API")
     run_migrations()
     logger.info("Startup complete")
+    yield
+
+
+app = FastAPI(title="Fraud/Anomaly Detection Platform API", lifespan=lifespan)
+app.state.container = container
 
 
 @app.get("/healthz", include_in_schema=False)

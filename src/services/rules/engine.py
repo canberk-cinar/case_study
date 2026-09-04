@@ -22,7 +22,7 @@ Two entry points for explainability, one shared machinery (_build_explanation):
 """
 import pandas as pd
 
-from src.services.rules.models import Rule, Severity
+from src.services.rules.domain.models import Rule, Severity
 from src.services.rules.resolution import SeverityHandler, resolve_by_priority
 
 

@@ -5,7 +5,7 @@ be; this was decided against premature infrastructure for a dataset this small.
 """
 import numpy as np
 
-from src.services.rag.models import Chunk, RetrievedChunk
+from src.services.rag.domain.models import Chunk, RetrievedChunk
 
 
 class VectorSearchIndex:

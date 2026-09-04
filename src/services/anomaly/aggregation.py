@@ -26,6 +26,12 @@ import pandas as pd
 
 RANK_SUFFIX = "_rank_normalized"
 
+# The dataset's own top-1% cutoff on final_raw_anomaly_score — first established in Case 9's
+# anomaly_scoring agent, and reused verbatim by fraud_r07 (fraud_rules.yaml) and the /score route
+# so there is exactly one "elevated" threshold in the whole project, defined next to the score it
+# thresholds rather than in a consumer of that score.
+RISK_THRESHOLD = 0.9410418735356755
+
 
 def compute_equal_weights(columns: list[str]) -> dict[str, float]:
     return {col: 1.0 / len(columns) for col in columns}

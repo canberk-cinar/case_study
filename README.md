@@ -23,9 +23,20 @@ cp .env.example .env
 
 Ham veri (`data/raw/train_transaction.csv`, `data/raw/train_identity.csv`) yerinde olmalı — Case 1
 notebook'u (`notebooks/case_01_analysis.ipynb`) bunları birleştirip `data/processed/
-merged_transactions.parquet`'i üretiyor; API ve sonraki tüm case'ler bu dosyayı okuyor. Önce Case 1
+merged_transactions.parquet`'i üretiyor; sonraki tüm case'ler bu dosyayı okuyor. Önce Case 1
 notebook'unu (`jupyter nbconvert --to notebook --execute --inplace notebooks/case_01_analysis.ipynb`)
-çalıştırmadan API'nin çoğu endpoint'i çalışmaz.
+çalıştırmadan hiçbir şey çalışmaz.
+
+**API'yi başlatmadan önce skorlama artifact'ini bir kez inşa edin:**
+
+```bash
+python -m src.pipelines.build_scoring_artifact
+```
+
+Bu, tüm veri seti için feature'ları ve anomali skorlarını hesaplayıp `case_study.db` içindeki
+`scored_transactions` tablosuna yazar (~40 sn, tek seferlik). API bu tablodan okur — olmadan
+endpoint'ler 404 verir (net bir hata mesajıyla, sessiz çökme yok). Skorlama/feature mantığı
+değiştiğinde yeniden çalıştırılmalı.
 
 ## LLM Konfigürasyonu (Case 8/9)
 
@@ -68,18 +79,20 @@ kontrolü.
 
 ## Endpoint'ler
 
-Beşi de bir `transaction_id` ile (`data/processed/merged_transactions.parquet`'teki mevcut bir
-satır) çalışır — bu bir "demo/analiz" API'si, canlı/yeni bir işlemi skorlayan bir prodüksiyon API'si
-değil (istatistikler/embedding'ler her istekte veri setinden taze hesaplanıyor, kalıcı bir model
-artifact'i hiç saklanmadı).
+Beşi de bir `transaction_id` ile (`scored_transactions` tablosundaki, dolayısıyla veri setindeki
+mevcut bir satır) çalışır — bu bir "demo/analiz" API'si, canlı/yeni bir işlemi skorlayan bir
+prodüksiyon API'si değil. Skorlar/feature'lar önceden hesaplanmış (`build_scoring_artifact`), tek
+satırlık lookup SQLite PK indeksiyle milisaniyeler sürüyor — ilk mimaride her istek tüm veri setini
+(590k satır, 4 anomali katmanı) yeniden hesaplıyordu (`/score` ~27s, `/agent` ~80s); ölçüldü,
+darboğaz teşhis edildi, düzeltildi.
 
-| Metod | Path | Ne yapar |
-|---|---|---|
-| GET | `/score/{transaction_id}` | Case 5'in ham anomali skoru — en hızlı, kural/LLM yok |
-| GET | `/rules/evaluate/{transaction_id}` | Case 7'nin yapılandırılmış kural değerlendirmesi (ateşlenen kurallar + verdict, mesajsız) |
-| GET | `/explain/{transaction_id}` | Aynı değerlendirme, kural başına insan-okur açıklama ile |
-| POST | `/rag/query` | Case 8'in RAG'ı — serbest soru (`{"question": "...", "transaction_id": null}`); `transaction_id` verilirse o işlemin kural verdict'ine göre açıklama üretir |
-| GET | `/agent/{transaction_id}` | Case 9'un tam multi-agent orkestrasyonu (feature engineering → anomaly scoring → rule engine → koşullu RAG açıklaması) |
+| Metod | Path | Ne yapar | Tipik süre |
+|---|---|---|---|
+| GET | `/score/{transaction_id}` | Case 5'in ham anomali skoru — en hızlı, kural/LLM yok | ~15ms |
+| GET | `/rules/evaluate/{transaction_id}` | Case 7'nin yapılandırılmış kural değerlendirmesi (ateşlenen kurallar + verdict, mesajsız) | ~50ms |
+| GET | `/explain/{transaction_id}` | Aynı değerlendirme, kural başına insan-okur açıklama ile | ~40ms |
+| POST | `/rag/query` | Case 8'in RAG'ı — serbest soru (`{"question": "...", "transaction_id": null}`); `transaction_id` verilirse o işlemin kural verdict'ine göre açıklama üretir | ~0,5s (LLM'siz) |
+| GET | `/agent/{transaction_id}` | Case 9'un tam multi-agent orkestrasyonu (feature engineering → anomaly scoring → rule engine → koşullu RAG açıklaması) | ~0,4s (LLM'siz) |
 
 ### Örnek istekler
 
@@ -103,7 +116,25 @@ curl http://localhost:8000/agent/2988038
   `run_agentic_analysis`), Repository (`db_services/*.py`).
 - **Dependency Injection:** `dependency_injector` — `RuleEngineContainer` (Case 7),
   `RAGContainer` (Case 8), ve bu ikisini FastAPI'nin `@inject`/`Provide[...]` mekanizmasıyla
-  birleştiren üst-seviye `ApiContainer` (Case 10, `src/container.py`).
+  birleştiren üst-seviye `ApiContainer` (Case 10, `src/container.py`). Beş endpoint'in **tamamı**
+  (agent dahil) container'dan besleniyor — `run_agentic_analysis(tx_id, rule_engine, rag_pipeline)`
+  bu iki bağımlılığı parametre olarak alıyor (referans projenin `build_graph(db)` closure
+  deseniyle aynı), kendi container'ını kurmuyor.
+- **Skorlama artifact'i:** `src/pipelines/build_scoring_artifact.py` (typer CLI) — tüm feature'ları
+  ve anomali skorlarını bir kez hesaplayıp `scored_transactions` (SQLite, `TransactionID` PK)
+  tablosuna yazar. `merged_transactions.parquet` (kolonsal, tam-tablo tarama — notebook'lar için
+  doğru) ile `scored_transactions` (indeksli, tek-satır lookup — API için doğru) bilerek iki farklı
+  depo: erişim deseni farklı olduğu için depo da farklı.
+- **`schemas/` vs `domain/`:** `src/schemas/` (üst seviye) sadece Case 10'un Pydantic API
+  sözleşmeleri — HTTP sınırını geçen tek katman. `rules/domain/models.py` (`Rule`, `Severity`,
+  `Action`) ve `rag/domain/models.py` (`Chunk`, `RetrievedChunk`) Pydantic DEĞİL, düz
+  dataclass/enum — Case 7/8'in API'den bağımsız, notebook'tan da çalışabilen iç veri modelleri.
+  İsim çakışmasını önlemek için ayrı tutuldu.
+- **Prompt'lar (`static/`):** `services/rag/static/system_prompt.json` — RAG'ın genel amaçlı
+  sistem promptu (herhangi bir `RAGPipeline` çağıranı kullanır). `agents/policy_explanation/
+  static/question_template.json` — SADECE bu agent'a özgü, bir rule verdict'ini doğal dile
+  çeviren soru şablonu. Diğer 3 agent (feature_engineering, anomaly_scoring, rule_engine) LLM
+  kullanmadığı için kendi `static/`'leri yok — sahte/kullanılmayan bir prompt eklenmedi.
 - **Notebook'lar:** her case'in kendi `notebooks/case_0N_*.ipynb`'i, çalıştırılmış çıktılarla —
   altyapının nasıl inşa edildiğinin ve doğrulandığının tam kaydı.
 
@@ -112,17 +143,22 @@ curl http://localhost:8000/agent/2988038
 ```
 src/
   config.py              # tüm ayarlar (pydantic-settings, .env'den)
-  database/               # SQLAlchemy modelleri + Repository-pattern CRUD (artifact, RAG knowledge base)
+  database/               # SQLAlchemy modelleri + Repository-pattern CRUD
+    models/scoring.py       # ScoredTransaction — API'nin okuma modeli (bkz. pipelines/)
+    models/rag.py            # RAG knowledge base (Document, DocumentChunk)
+  pipelines/                  # tek seferlik/batch script'ler
+    build_scoring_artifact.py  # feature+skorları hesaplayıp scored_transactions'a yazan typer CLI
   services/
     analyzers/              # Case 1/2 — veri kalitesi, dağılım, cardinality analizleri
     features/                 # Case 3 — causal (sızıntısız) feature engineering
     anomaly/                    # Case 4/5/6 — 4 katmanlı anomali skorlama + birleştirme + context adjustment
-    rules/                        # Case 7 — configurable if-then rule engine
-    rag/                            # Case 8 — RAG pipeline
-    agents/                           # Case 9 — LangGraph multi-agent orkestrasyon
-  routes/, schemas/                     # Case 10 — FastAPI endpoint'leri
-  container.py                            # Case 10 — üst-seviye DI container
-main.py                                    # FastAPI giriş noktası
+    rules/                        # Case 7 — configurable if-then rule engine (domain/models.py: Rule/Severity/Action)
+    rag/                            # Case 8 — RAG pipeline (domain/models.py: Chunk/RetrievedChunk; static/system_prompt.json)
+  agents/                             # Case 9 — LangGraph multi-agent orkestrasyon (src/ altında, services/ dışında — referans proje yapısıyla aynı)
+    policy_explanation/                  # tek LLM-tabanlı agent; static/question_template.json kendi promptu
+  routes/, schemas/                     # Case 10 — FastAPI endpoint'leri (schemas/ = Pydantic API sözleşmeleri)
+  container.py                            # Case 10 — üst-seviye DI container (5 endpoint'in tamamı buradan besleniyor)
+main.py                                    # FastAPI giriş noktası (lifespan, healthz, router'lar)
 notebooks/                                   # her case'in çalıştırılmış defteri
 data/knowledge_base/                           # RAG için örnek policy dökümanları
 ```

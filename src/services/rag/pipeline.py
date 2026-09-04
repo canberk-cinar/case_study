@@ -5,9 +5,11 @@ and generation — three methods hide the whole multi-step flow:
     gracefully (never raises) if the LLM provider is unreachable — returns the retrieval +
     constructed prompt with `answer=None` and an explanatory `note`, so retrieval and context
     injection stay independently verifiable without Ollama running.
-  - answer_for_flagged_transaction(db, explanation): the Case 7 bridge — turns a
-    RuleEngine.explain()-shaped dict directly into a grounded natural-language question, which is
-    this case's actual "make anomaly results more explainable" deliverable, not a generic QA demo.
+
+Turning a Case 7 rule verdict into a flagged-transaction question is NOT this pipeline's concern —
+that's Case 9's policy_explanation agent's own task-specific prompt
+(agents/policy_explanation/static/question_template.json), kept out of this generic module on
+purpose so RAGPipeline stays usable by any caller with any question, agent or not.
 
 One constraint worth stating plainly: the SAME RAGPipeline instance (and therefore the same
 embedding_provider instance) must be used for both ingest() and answer() in one run — TF-IDF's
@@ -23,7 +25,7 @@ from src.database.db_services.rag import add_chunk, add_document, chunk_embeddin
 from src.services.rag.chunking import chunk_text
 from src.services.rag.embeddings import EmbeddingProvider
 from src.services.rag.llm import LLMProvider
-from src.services.rag.models import Chunk, RetrievedChunk
+from src.services.rag.domain.models import Chunk, RetrievedChunk
 from src.services.rag.prompt import PromptBuilder
 from src.services.rag.vector_search import VectorSearchIndex
 
@@ -98,14 +100,3 @@ class RAGPipeline:
             note = f"LLM generation failed ({self.llm_provider.name}): {exc} — showing retrieval + prompt only."
 
         return {"question": question, "sources": retrieved, "prompt": prompt, "answer": answer_text, "note": note}
-
-    def answer_for_flagged_transaction(self, db: Session, explanation: dict, top_k: int | None = None) -> dict:
-        """`explanation`: the dict shape produced by Case 7's RuleEngine.explain() /
-        explain_batch() — src/services/rules/engine.py."""
-        rule_names = ", ".join(f["rule_name"] for f in explanation["fired_rules"])
-        question = (
-            f"A transaction was flagged by these rules: {rule_names}. "
-            f"Final verdict: {explanation['verdict_severity']} / {explanation['verdict_action']}. "
-            "Explain why this transaction was considered risky, based on the relevant policies."
-        )
-        return self.answer(db, question, top_k=top_k)

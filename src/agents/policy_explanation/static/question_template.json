@@ -1,0 +1,3 @@
+{
+  "question_template": "A transaction was flagged by these rules: {rule_names}. Final verdict: {verdict_severity} / {verdict_action}. Explain why this transaction was considered risky, based on the relevant policies."
+}

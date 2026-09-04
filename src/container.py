@@ -20,6 +20,7 @@ class ApiContainer(containers.DeclarativeContainer):
         "src.routes.rules",
         "src.routes.explainability",
         "src.routes.rag",
+        "src.routes.agent",
     ])
 
     rule_engine_container = providers.Container(RuleEngineContainer)

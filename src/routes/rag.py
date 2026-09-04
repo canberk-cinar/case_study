@@ -1,8 +1,9 @@
 """Case 10 — POST /rag/query: Case 8's RAGPipeline, free-form question against the policy
-knowledge base. Optional `transaction_id` routes through `answer_for_flagged_transaction` (grounds
-the question in that transaction's rule verdict) instead of a bare question. RAGPipeline comes
-from the DI container — swapping embedding/LLM provider (container.rag_container.config) needs no
-route code change.
+knowledge base. Optional `transaction_id` grounds the question in that transaction's rule verdict
+instead of a bare question — reuses Case 9's own question-framing prompt
+(agents/policy_explanation/static/question_template.json via build_flagged_transaction_question)
+rather than duplicating it here. RAGPipeline comes from the DI container — swapping embedding/LLM
+provider (container.rag_container.config) needs no route code change.
 
 Re-ingests the (tiny, 8-document) knowledge base on every request rather than caching it across
 requests — simpler, and cheap at this scale (matches Case 8/9's own per-call ingest pattern);
@@ -14,6 +15,7 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from src.agents.policy_explanation.agent import build_flagged_transaction_question
 from src.config import REPO_ROOT
 from src.container import ApiContainer
 from src.database.db import get_db
@@ -54,7 +56,8 @@ def rag_query(
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=str(exc))
         explanation = engine.explain(row)
-        result = pipeline.answer_for_flagged_transaction(db, explanation)
+        question = build_flagged_transaction_question(explanation)
+        result = pipeline.answer(db, question)
     else:
         result = pipeline.answer(db, body.question)
 
