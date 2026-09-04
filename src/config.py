@@ -23,12 +23,14 @@ class Settings(BaseSettings):
     COLUMN_BATCH_SIZE: int = 25
     PARQUET_COMPRESSION: str = "zstd"
 
-    # Case 9 agentic pipeline — points at Ollama's OpenAI-compatible endpoint by default (the
-    # brief's local-first requirement); repointable to OpenRouter/Claude-compatible endpoints via
-    # env vars alone, no code change, once that's settled.
-    LLM_BASE_URL: str = "http://localhost:11434/v1"
-    LLM_API_KEY: str = "ollama"  # Ollama ignores the key but the OpenAI client requires one present
-    LLM_MODEL: str = "smollm2:360m"
+    # Feeds Case 8's RAGContainer default config (its `openrouter_*` keys) — the LLM provider
+    # Case 9's policy_explanation agent ultimately calls through. The brief's original ask for
+    # Case 8/9 was local-only (Ollama); the case study team approved OpenRouter's free tier
+    # instead once this machine's limited RAM ruled out running a local model well. Real
+    # model name and API key belong in .env, never hardcoded here.
+    LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
+    LLM_API_KEY: str = ""
+    LLM_MODEL: str = ""
 
     @property
     def raw_data_path(self) -> Path:

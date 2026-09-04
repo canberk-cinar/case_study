@@ -1,20 +1,12 @@
 """Case 9 — rule_engine agent node: wraps Case 7's RuleEngine (Adapter pattern), fully
-deterministic. Reassembles the columns fraud_rules.yaml's conditions need (raw transaction fields
-+ Case 3 features + Case 5's final_raw_anomaly_score) and calls RuleEngine.explain() for this one
-transaction — the exact same explainability output Case 7's notebook already demonstrated.
+deterministic. Row assembly (raw fields + Case 3 features + Case 5's final_raw_anomaly_score) is
+shared with Case 10's /rules/evaluate and /explain routes via rules/data.py — not duplicated here.
 """
 import logging
 
-import pyarrow.parquet as pq
-
-from src.config import REPO_ROOT, settings
+from src.config import REPO_ROOT
 from src.services.agents.state import AgentState
-from src.services.anomaly.aggregation import compute_final_raw_anomaly_score
-from src.services.anomaly.combined import PRIMARY_SCORE_COLUMNS, compute_all_anomaly_scores
-from src.services.anomaly.normalization import normalize_scores
-from src.services.features.entity import build_entity_features
-from src.services.features.relational import build_relational_features
-from src.services.features.temporal import build_temporal_features
+from src.services.rules.data import load_transaction_row
 from src.services.rules.engine import RuleEngine
 from src.services.rules.loader import RuleLoader
 from src.services.rules.resolution import build_default_resolution_chain
@@ -28,28 +20,11 @@ def evaluate_rules(state: AgentState) -> dict:
     transaction_id = state["transaction_id"]
     logger.info("evaluate_rules — transaction_id=%s", transaction_id)
 
-    parquet_path = settings.processed_data_path / "merged_transactions.parquet"
-    raw = pq.ParquetFile(parquet_path).read(
-        columns=["TransactionID", "TransactionAmt", "addr2", "DeviceInfo", "dist1"]
-    ).to_pandas()
-    temporal = build_temporal_features(parquet_path)
-    entity = build_entity_features(parquet_path)
-    relational = build_relational_features(parquet_path)
-    all_scores = compute_all_anomaly_scores(parquet_path)
-    normalized = normalize_scores(all_scores, PRIMARY_SCORE_COLUMNS)
-    final_raw = compute_final_raw_anomaly_score(normalized, PRIMARY_SCORE_COLUMNS)
-
-    df = raw.merge(temporal, on="TransactionID") \
-        .merge(entity, on="TransactionID") \
-        .merge(relational, on="TransactionID") \
-        .merge(final_raw, on="TransactionID")
-    row = df.loc[df["TransactionID"] == transaction_id]
-    if row.empty:
-        raise ValueError(f"transaction_id={transaction_id} not found in merged_transactions.parquet")
+    row = load_transaction_row(transaction_id)
 
     rules = RuleLoader().load(RULES_PATH)
     engine = RuleEngine(rules, build_default_resolution_chain())
-    explanation = engine.explain(row.iloc[0])
+    explanation = engine.explain(row)
 
     logger.info(
         "evaluate_rules — verdict_severity=%s verdict_action=%s",
