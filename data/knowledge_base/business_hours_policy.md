@@ -1,13 +1,15 @@
-# Mesai Saatleri Risk Politikası
+# Business Hours Risk Policy
 
-Sistem, işlemleri mesai saatleri (hafta içi 09:00-18:00) ile mesai dışı saatler arasında farklı
-değerlendirir. Veri analizi, mesai dışı saatlerde — özellikle 04:00-09:00 arası — işlem hacminin
-çok düşük olduğunu ama fraud oranının bu saatlerde daha yüksek çıktığını göstermiştir.
+The system evaluates transactions differently depending on whether they occur during business
+hours (weekdays 09:00-18:00) or outside them. Data analysis showed that off-hours — especially the
+04:00-09:00 window — carry very low transaction volume, but a higher fraud rate than the rest of
+the day.
 
-Bu nedenle iki farklı düzeltme yaklaşımı uygulanır: hacim/güven tabanlı yaklaşım, az veriye
-dayanan mesai dışı saatlerin istatistiksel olarak daha az güvenilir olduğunu varsayarak skoru
-hafifletir; fraud-oranı-kalibreli yaklaşım ise, ölçülen gerçek fraud oranına göre mesai dışı
-işlemlerin skorunu artırır. Her iki yöntem de ayrı ayrı hesaplanır ve karşılaştırılır — sistem tek
-bir "doğru" yön varsaymaz, iki farklı prensibin sonuçlarını şeffaf şekilde sunar.
+Two different correction approaches are applied for this reason: a volume/confidence-based
+approach dampens the score for off-hours transactions, on the assumption that statistics built on
+sparse data are less reliable; a fraud-rate-calibrated approach instead boosts the score for
+off-hours transactions, based on the actually measured fraud rate. Both methods are computed and
+compared separately — the system does not assume a single "correct" direction, it transparently
+presents the results of both principles.
 
-Mesai saatleri içindeki işlemler için herhangi bir düzeltme uygulanmaz; çarpan her zaman 1,0'dır.
+No correction is applied to transactions within business hours; the multiplier is always 1.0.

@@ -1,12 +1,13 @@
-# [DENEYSEL — Rule Engine'de Karşılığı Yok] Kripto Borsası İşlem Politikası
+# [EXPERIMENTAL — No Counterpart in the Rule Engine] Crypto Exchange Transaction Policy
 
-Bu politika, RAG bilgi tabanının knowledge-base içeriğine bağlı çalıştığını, kod tabanındaki
-gerçek kurallara değil, göstermek amacıyla eklenmiş kurgusal bir örnektir. Sistemin gerçek kural
-motorunda (Case 7) karşılığı YOKTUR.
+This policy is a fictional example added purely to demonstrate that the RAG knowledge base
+operates on its own content, not on the actual rules in the codebase. It has NO counterpart in the
+system's real rule engine (Case 7).
 
-Kurgusal senaryo: bilinen kripto para borsalarına yapılan 10.000 TL üzerindeki tek seferlik
-transferler, ek kimlik doğrulaması gerektiren bir "yüksek dikkat" kategorisine alınır. Özellikle
-işlemin, kartın ilk kez kullanıldığı bir cihazdan yapılması durumunda önem derecesi artırılır.
+Fictional scenario: single transfers over 10,000 TL to known cryptocurrency exchanges are placed
+in a "high attention" category requiring additional identity verification. The severity is
+increased in particular when the transaction is made from a device used for the first time on
+that card.
 
-Bu politika sadece RAG pipeline'ının retrieval ve context-injection mekanizmalarını test etmek
-için yazılmıştır; gerçek bir kural olarak sisteme uygulanmamıştır.
+This policy was written only to test the RAG pipeline's retrieval and context-injection
+mechanisms; it has not been applied to the system as a real rule.

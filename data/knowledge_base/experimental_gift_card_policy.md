@@ -1,14 +1,14 @@
-# [DENEYSEL — Rule Engine'de Karşılığı Yok] Hediye Kartı Toplu Alım Politikası
+# [EXPERIMENTAL — No Counterpart in the Rule Engine] Gift Card Bulk Purchase Policy
 
-Bu döküman da, brief'in izin verdiği şekilde, "var olmayan" bir kural örneği olarak bilerek
-eklenmiştir — rule engine'de (Case 7) uygulanan gerçek bir kural değildir, sadece RAG bilgi
-tabanının içeriğini test etmek içindir.
+This document, too, was deliberately added as an example of a "non-existent" rule, as the brief
+permits — it is not a real rule implemented in the rule engine (Case 7), it exists only to test
+the knowledge base's content.
 
-Kurgusal senaryo: aynı kart ile 24 saat içinde birden fazla farklı satıcıdan hediye kartı satın
-alınması, klasik bir "para aklama" veya "çalıntı kart nakde çevirme" örüntüsü olarak bilinir. Bu
-senaryoda, üç veya daha fazla farklı satıcıdan yapılan hediye kartı alımı MEDIUM önem derecesiyle
-işaretlenir önerisi getirilmiştir.
+Fictional scenario: purchasing gift cards from multiple different merchants with the same card
+within 24 hours is a known "money laundering" or "stolen card cash-out" pattern. In this scenario,
+gift card purchases from three or more different merchants are proposed to be flagged at MEDIUM
+severity.
 
-Gerçek veri setinde satıcı kategorisi/ürün tipi bilgisi bulunmadığı için bu politika şu anki rule
-engine'e eklenmemiştir; yalnızca knowledge-base içeriğinin kod tabanından bağımsız olduğunu
-göstermek için buradadır.
+Because the real dataset has no merchant-category/product-type information, this policy has not
+been added to the current rule engine; it exists here only to show that the knowledge base's
+content is independent of the codebase.

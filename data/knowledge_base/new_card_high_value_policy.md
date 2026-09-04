@@ -1,13 +1,13 @@
-# Yeni Kart, Yüksek Değerli İlk İşlem Politikası
+# New Card, High-Value First Transaction Policy
 
-Bir kartın gözlemlenen ilk işleminin (önceki işlem geçmişi sıfır) yüksek tutarlı olması, kartın
-davranışını doğrulayacak hiçbir geçmiş veri olmadan büyük bir riske girildiği anlamına gelir. Bu
-durum CRITICAL önem derecesiyle işaretlenir ve işlemi durdurma (BLOCK) eylemini tetikler.
+A card's very first observed transaction (zero prior transaction history) being high-value means a
+large risk is being taken with no historical data to verify the card's behavior. This is flagged
+at CRITICAL severity and triggers the block (BLOCK) action.
 
-Ayrıca, hafta sonu ve düşük-hacimli saat diliminde (04:00-09:00) gerçekleşen yüksek tutarlı
-işlemler ayrı bir MEDIUM seviyeli işaretleme (FLAG) alır — bu, tek başına zayıf olan iki bağlamsal
-sinyalin (hafta sonu + düşük hacim) birleşiminin, tek başına her birinden daha güçlü bir risk
-göstergesi olduğu gözlemine dayanır.
+Additionally, high-value transactions occurring during the weekend and the low-volume hour window
+(04:00-09:00) receive a separate MEDIUM-level flag (FLAG) — based on the observation that
+combining two individually weak contextual signals (weekend + low volume) is a stronger risk
+indicator than either alone.
 
-Yüksek tutar eşiği, verinin kendi yüzdelik dilimlerinden (yaklaşık üst %5) türetilmiştir; gerçek
-fraud etiketine bakılarak seçilmemiştir.
+The high-amount threshold is derived from the data's own percentiles (roughly the top 5%); it was
+not chosen by looking at the actual fraud label.

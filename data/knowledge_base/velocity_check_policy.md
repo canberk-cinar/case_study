@@ -1,14 +1,14 @@
-# Velocity (Hızlı Tekrar İşlem) Politikası
+# Velocity (Rapid Repeat Transaction) Policy
 
-Aynı kartın çok kısa süre içinde tekrar işlem yapması, kart-test etme (card testing) veya otomatik
-fraud saldırılarının klasik bir işaretidir. Sistem, bir kartın önceki işleminden bu yana geçen
-süreyi izler.
+The same card transacting again within a very short time is a classic signature of card testing
+or automated fraud attacks. The system tracks the time elapsed since a card's previous
+transaction.
 
-60 saniyeden kısa sürede yapılan tekrar işlemler HIGH önem derecesiyle işaretlenir ve incelemeye
-(REVIEW) yönlendirilir. Daha güçlü bir örüntü ise "adres değişimi + hızlı tekrar" birleşimidir:
-kart için daha önce hiç kullanılmamış yeni bir faturalandırma adresiyle, 300 saniye içinde tekrar
-işlem yapılması — bu, çalıntı kart numaralarının birden fazla "drop" adresine karşı test edildiği
-fraud çetesi örüntüsüne benzer ve CRITICAL önem derecesiyle işlemi durdurma (BLOCK) eylemini
-tetikler.
+Repeat transactions within less than 60 seconds are flagged at HIGH severity and routed to review
+(REVIEW). A stronger pattern is the combination of "address change + rapid repeat": a new billing
+address never used before on this card, used again within 300 seconds — resembling the
+address-hopping pattern fraud rings use to test stolen card numbers against multiple drop
+addresses — and this triggers the block (BLOCK) action at CRITICAL severity.
 
-Kartın hiç önceki işlemi yoksa (ilk işlem), velocity kontrolü anlamsızdır ve uygulanmaz.
+If the card has no prior transaction at all (a first transaction), the velocity check is
+meaningless and is not applied.

@@ -1,14 +1,16 @@
-# Coğrafi Risk Politikası
+# Geographic Risk Policy
 
-Faturalandırma bölge/ülke kodu (addr2), sistemde ölçülen en güçlü risk sinyalidir. Verinin
-%99,2'si tek bir yerli bölge koduna aittir; bu koddan farklı (yabancı) işlemlerde fraud oranı
-yerli işlemlere göre yaklaşık 4,26 kat daha yüksektir. Bölge kodu eksik olan işlemlerde ise fraud
-oranı yabancı işlemlerden bile daha yüksektir (yaklaşık 4,91 kat) — bu yüzden politika, yabancı ve
-eksik durumları AYRI iki risk katmanı olarak ele alır, tek bir "yabancı" kategorisinde birleştirmez.
+The billing region/country code (addr2) is the strongest risk signal measured in the system.
+99.2% of the data belongs to a single domestic region code; transactions with a different
+(foreign) code have a fraud rate about 4.26x higher than domestic transactions. Transactions with
+a missing region code have an even higher fraud rate than foreign ones (about 4.91x) — which is
+why the policy treats "foreign" and "missing" as two SEPARATE risk tiers rather than merging them
+into one "foreign" category.
 
-İki yöntem uygulanır: sabit bir politika çarpanı (sadece kesin bilinen yabancı işlemler için, 2,0
-kat — eksik veriye dokunulmaz, çünkü etiketsiz bir politika "bilinmiyor"u "riskli" diye
-varsayamaz) ve fraud-oranı-kalibreli bir çarpan (yerli=1,0, yabancı≈4,26, eksik≈4,91).
+Two methods are applied: a fixed policy multiplier (only for transactions with a definitively
+known foreign code, 2.0x — missing data is left untouched, because a label-free policy cannot
+assume "unknown" means "risky") and a fraud-rate-calibrated multiplier (domestic=1.0,
+foreign≈4.26, missing≈4.91).
 
-Diğer coğrafi adaylar (fiziksel mesafe, e-posta alan adı uzantısı) test edilmiş ama güvenilir
-bulunmadığı için kullanılmamıştır.
+Other geographic candidates (physical distance, email domain suffix) were tested but not used
+because they were not found to be reliable.
