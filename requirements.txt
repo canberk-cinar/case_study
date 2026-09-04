@@ -17,3 +17,6 @@ jupyter
 pytest
 httpx
 anyio
+langgraph
+langchain-core
+langchain-openai

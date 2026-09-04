@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     COLUMN_BATCH_SIZE: int = 25
     PARQUET_COMPRESSION: str = "zstd"
 
+    # Case 9 agentic pipeline — points at Ollama's OpenAI-compatible endpoint by default (the
+    # brief's local-first requirement); repointable to OpenRouter/Claude-compatible endpoints via
+    # env vars alone, no code change, once that's settled.
+    LLM_BASE_URL: str = "http://localhost:11434/v1"
+    LLM_API_KEY: str = "ollama"  # Ollama ignores the key but the OpenAI client requires one present
+    LLM_MODEL: str = "smollm2:360m"
+
     @property
     def raw_data_path(self) -> Path:
         return REPO_ROOT / self.RAW_DATA_DIR
