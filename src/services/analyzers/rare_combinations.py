@@ -1,7 +1,7 @@
-"""Case 2 — rare categorical combination analysis.
+"""Case 2: rare categorical combination analysis.
 
 Finds column-value combinations across a small set of interpretable categorical columns that
-occur far less often than their marginal frequencies would suggest — the joint distribution can
+occur far less often than their marginal frequencies would suggest: the joint distribution can
 be rare even when every individual value is common on its own, and that's exactly the pattern a
 per-column profile (Case 1) can't see.
 
@@ -20,7 +20,7 @@ from src.config import settings
 
 COMBINATION_COLUMNS = ["ProductCD", "card4", "card6", "DeviceType"]
 
-# A combination is flagged rare if it clears either floor — count alone would flag legitimate
+# A combination is flagged rare if it clears either floor: count alone would flag legitimate
 # small segments as "rare" purely because ~590k rows makes any ratio look tiny, so both a small
 # absolute count and a tiny ratio are required together with an OR (either one is suspicious
 # enough to report) rather than needing both (which would under-flag).
@@ -41,7 +41,7 @@ def compute_combination_frequencies(parquet_path: Path, columns: list[str] = COM
 
 def find_unobserved_combinations(parquet_path: Path, columns: list[str] = COMBINATION_COLUMNS) -> pd.DataFrame:
     """Combinations that are theoretically possible (cross-product of each column's observed
-    values) but never occur in the data — either a structurally impossible pairing or simply
+    values) but never occur in the data: either a structurally impossible pairing or simply
     below this dataset's scale to have hit yet."""
     df = pq.ParquetFile(parquet_path).read(columns=columns).to_pandas().dropna(subset=columns)
     observed = compute_combination_frequencies(parquet_path, columns)

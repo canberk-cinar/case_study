@@ -1,4 +1,4 @@
-"""Case 6, Item 1 — business hours context: reweights Case 5's final_raw_anomaly_score based on
+"""Case 6, Item 1: business hours context: reweights Case 5's final_raw_anomaly_score based on
 whether a transaction occurred during standard business hours, using two DIFFERENT and
 DELIBERATELY CONTRASTED principles rather than picking one:
 
@@ -8,14 +8,14 @@ DELIBERATELY CONTRASTED principles rather than picking one:
     shallow history is noisier and more likely to produce spurious extreme scores). A raw score
     that's high mainly because it landed in a low-volume hour is exactly the shape of a false
     positive this step is meant to reduce, so off-hours scores are damped in proportion to how
-    little data backs that hour — unless the raw score is already in the extreme tail (top 1%),
+    little data backs that hour: unless the raw score is already in the extreme tail (top 1%),
     which is treated as genuinely extreme regardless of when it happened.
-  - apply_fraud_rate_calibrated_adjustment (uses isFraud — a deliberate, explicitly marked
-    exception): Case 1 found the *opposite* real-world pattern in this dataset — fraud rate is
+  - apply_fraud_rate_calibrated_adjustment (uses isFraud: a deliberate, explicitly marked
+    exception): Case 1 found the *opposite* real-world pattern in this dataset: fraud rate is
     highest exactly in the low-volume hours the first function dampens. Calibrating the
     adjustment against that measured rate produces the mirror-image correction: off-hours scores
     are boosted, not damped. This is the first place in the whole project where isFraud
-    parameterizes a design choice rather than only checking one after the fact — flagged loudly
+    parameterizes a design choice rather than only checking one after the fact: flagged loudly
     here and in the notebook, not quietly slipped in. A real deployment would need this kind of
     label-calibrated rule to go through its own held-out validation before use; that's out of
     scope here.
@@ -29,11 +29,11 @@ import pandas as pd
 BUSINESS_HOUR_START = 9
 BUSINESS_HOUR_END = 18  # exclusive
 
-# Raw scores at or above this percentile are treated as genuinely extreme regardless of hour —
+# Raw scores at or above this percentile are treated as genuinely extreme regardless of hour,
 # not damped even off-hours, so a real outlier can't be waved away just because it's 4am.
 EXTREME_SCORE_PERCENTILE = 0.99
 
-# Even the lowest-volume hour's confidence multiplier never drops below this — an off-hours
+# Even the lowest-volume hour's confidence multiplier never drops below this: an off-hours
 # anomaly is still worth some attention, just less confidently, never zeroed out entirely.
 MIN_CONFIDENCE_MULTIPLIER = 0.5
 

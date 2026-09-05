@@ -1,26 +1,25 @@
-"""Case 9 — builds the LangGraph StateGraph: feature_engineering -> anomaly_scoring -> rule_engine
+"""Case 9: builds the LangGraph StateGraph: feature_engineering -> anomaly_scoring -> rule_engine
 -> [conditional] -> policy_explanation -> END.
 
 build_graph(rule_engine, rag_pipeline) takes both dependencies as parameters and closes over them
-in the two node functions that need them — the same closure-injection shape as the user's own
-reference project (dashboard/backend/src/agents/graph.py::build_graph(db)). Both come from
-ApiContainer (Case 10's DI container) via supervisor/agent.py, so /agent is no longer the one
-endpoint that builds its own container internally — every route now shares the same configured
+in the two node functions that need them: a closure-injection shape consistent with the
+dependency_injector pattern used across the rest of the API layer (Case 10's ApiContainer). Both
+dependencies come from ApiContainer via supervisor/agent.py, so /agent is no longer the one
+endpoint that builds its own container internally: every route now shares the same configured
 RuleEngine/RAGPipeline instances.
 
-Both anomaly_scoring and rule_engine always run — Case 7's own notebook already established that
+Both anomaly_scoring and rule_engine always run: Case 7's own notebook already established that
 the statistical anomaly score and the rule engine's verdict catch LARGELY DISJOINT sets of risky
 transactions (see case_07_rule_engine.ipynb section 10: "sadece iş kuralları" vs "sadece AI" are
-mostly different transactions). An earlier version of this graph gated rule_engine behind a high
-anomaly score, which would have skipped the rule engine entirely for exactly the transactions its
-own examples fire on (e.g. fraud_r01's CRITICAL example transaction has a below-threshold raw
-anomaly score) — caught while verifying this module, fixed by running both unconditionally
-(both are cheap and deterministic) and escalating to policy_explanation if EITHER signal is high.
+mostly different transactions). Gating rule_engine behind a high anomaly score would skip it
+entirely for exactly the transactions its own examples fire on (e.g. fraud_r01's CRITICAL example
+transaction has a below-threshold raw anomaly score), so both run unconditionally (both are cheap
+and deterministic) and escalate to policy_explanation if EITHER signal is high.
 
-The one conditional edge is a plain Python function on state, not an LLM call — same philosophy
+The one conditional edge is a plain Python function on state, not an LLM call: same philosophy
 as the reference project: use an LLM only where genuine ambiguity/NLU is involved. The one place
 an LLM genuinely earns its keep here is policy_explanation, turning a structured verdict into a
-grounded natural-language explanation — not the routing decision itself.
+grounded natural-language explanation: not the routing decision itself.
 """
 import logging
 
@@ -45,7 +44,7 @@ def _route_after_rule_engine(state: AgentState) -> str:
     rule_flagged = severity in ESCALATION_SEVERITIES
     decision = "policy_explanation" if (anomaly_flagged or rule_flagged) else "end_structured"
     logger.info(
-        "route_after_rule_engine — risk_level=%s verdict_severity=%s -> %s",
+        "route_after_rule_engine: risk_level=%s verdict_severity=%s -> %s",
         state["risk_level"], severity, decision,
     )
     return decision

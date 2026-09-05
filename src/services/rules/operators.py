@@ -1,7 +1,7 @@
-"""Case 7 — Strategy pattern: each comparison operator is an interchangeable, vectorized
+"""Case 7: Strategy pattern: each comparison operator is an interchangeable, vectorized
 (Series-in, Series[bool]-out) algorithm behind one common interface (a callable of
 `(field_values: pd.Series, operand) -> pd.Series[bool]`), selected at runtime by the string name
-that appears in a rule's YAML/JSON condition (`operator: "gt"`, etc.) — the loader never branches
+that appears in a rule's YAML/JSON condition (`operator: "gt"`, etc.): the loader never branches
 on operator name itself, it just looks it up in OPERATOR_REGISTRY.
 
 Every function is written to evaluate over a whole DataFrame column at once, consistent with how

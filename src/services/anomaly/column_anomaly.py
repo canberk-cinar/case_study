@@ -1,7 +1,7 @@
-"""Case 4 — column-level (univariate) anomaly detection.
+"""Case 4: column-level (univariate) anomaly detection.
 
 For each numeric column, scores every row by how far its value sits from that column's typical
-value — a modified (MAD-based) z-score, robust to the outliers/skew Case 1 found dominate this
+value: a modified (MAD-based) z-score, robust to the outliers/skew Case 1 found dominate this
 dataset (91 of 96 numeric columns were flagged as heavily right-skewed). Log1p is applied first
 wherever distributions.py already recommended it, so this reuses Case 1's already-validated
 per-column judgment rather than re-deriving it with a second set of rules.
@@ -9,22 +9,22 @@ per-column judgment rather than re-deriving it with a second set of rules.
 This is the "column anomaly" layer of Case 4's multi-layer architecture: it looks at each column
 in isolation, unlike the multivariate layer (columns considered together) or the entity/temporal
 layers (a row's own history). Column-batched, same reasoning as every other analyzer/feature
-module in this project — the full per-column z-score matrix (96 x 590k rows, ~450MB) is never
+module in this project: the full per-column z-score matrix (96 x 590k rows, ~450MB) is never
 held in memory at once; only four running per-row accumulators are, each ~5MB.
 
 Combined into one score per row via four signals:
   - column_anomaly_mean_abs_zscore: average anomalousness across all scored columns for this row
-    — the layer's primary score.
+   : the layer's primary score.
   - column_anomaly_scored_count: how many columns actually had a value for this row (most rows
-    are missing most of the 96 numeric columns — Case 1 found an average of ~196 missing columns
+    are missing most of the 96 numeric columns: Case 1 found an average of ~196 missing columns
     per row out of 434). This is reported explicitly because it matters for interpreting the
     score: a row with very few valid columns and one extreme value gets a much noisier
-    mean_abs_zscore than a row averaging the same extreme value across many columns — the score
+    mean_abs_zscore than a row averaging the same extreme value across many columns: the score
     is not directly comparable across rows with very different scored_count.
   - column_anomaly_extreme_column_count: how many columns individually cross
-    MAD_OUTLIER_THRESHOLD (reused from quality.py — same definition of "extreme" used there).
+    MAD_OUTLIER_THRESHOLD (reused from quality.py: same definition of "extreme" used there).
   - column_anomaly_top_column / column_anomaly_max_abs_zscore: the single column driving the
-    row's score hardest — the explainability anchor ("flagged mainly because of V266").
+    row's score hardest: the explainability anchor ("flagged mainly because of V266").
 """
 import logging
 from pathlib import Path

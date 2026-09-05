@@ -1,25 +1,25 @@
-"""Case 4 — multivariate anomaly detection: how anomalous is a transaction across TransactionAmt,
+"""Case 4: multivariate anomaly detection: how anomalous is a transaction across TransactionAmt,
 C9, and C13 considered JOINTLY, not one column at a time (that's column_anomaly.py's job).
 
 Feature scope note: column_anomaly.py found only 8 of 96 numeric columns are non-degenerate
-(MAD != 0). Of those, only TransactionAmt, C9, and C13 are also fully populated (0% missing) —
+(MAD != 0). Of those, only TransactionAmt, C9, and C13 are also fully populated (0% missing);
 the rest (id_02, D8, D9, id_21, id_25) are 76-99% missing, and requiring all 8 simultaneously
 non-null leaves just 0.5% of rows (2,971 out of 590,540). Widening the missingness threshold to
-even 30% adds nothing — the next non-degenerate column after these three jumps straight to 76%
+even 30% adds nothing: the next non-degenerate column after these three jumps straight to 76%
 missing; there is no gentle middle ground in this dataset. So this layer deliberately works with
 three columns, not eight: thin, but every row can actually be scored, which a multivariate method
 needs (unlike column_anomaly.py's independent per-column batching, a joint distance needs all its
 dimensions valid at once for a given row).
 
 Two methods, computed on the identical 3-column feature matrix (log1p applied wherever
-distributions.py already recommended it — no new judgment call here), same "compare, don't just
+distributions.py already recommended it: no new judgment call here), same "compare, don't just
 pick one" instinct as quality.py's IQR vs MAD:
   - Mahalanobis distance (pure numpy): distance from the multivariate center, accounting for
     correlation between the three features. Assumes a roughly elliptical joint distribution.
-    Directly explainable — each feature's own contribution to the squared distance is computable.
+    Directly explainable: each feature's own contribution to the squared distance is computable.
   - Isolation Forest (scikit-learn): tree-based, captures non-linear multivariate structure
     Mahalanobis can't. Not decomposable per-row the way Mahalanobis is; this module reports the
-    feature with the largest univariate (MAD) deviation as an approximate explanation — not
+    feature with the largest univariate (MAD) deviation as an approximate explanation: not
     Isolation Forest's literal split logic, just a practical, cheap stand-in.
 """
 from pathlib import Path
@@ -54,7 +54,7 @@ def compute_mahalanobis_scores(parquet_path: Path, columns: list[str] = MULTIVAR
 
     mean = X.mean(axis=0)
     cov = np.cov(X, rowvar=False)
-    inv_cov = np.linalg.pinv(cov)  # pseudo-inverse — safe even if cov is near-singular
+    inv_cov = np.linalg.pinv(cov)  # pseudo-inverse: safe even if cov is near-singular
 
     diff = X - mean
     contribution = (diff @ inv_cov) * diff  # per-dimension contribution to the squared distance
@@ -85,7 +85,7 @@ def compute_isolation_forest_scores(parquet_path: Path, columns: list[str] = MUL
     anomaly_score = -model.decision_function(X)
 
     # Approximate per-row explanation: each feature's own MAD-based deviation, reused from
-    # column_anomaly.py's mechanism — not Isolation Forest's actual split logic, just a cheap,
+    # column_anomaly.py's mechanism: not Isolation Forest's actual split logic, just a cheap,
     # practical stand-in for "which single feature looks most unusual on its own here."
     per_col_z = np.zeros_like(X)
     for j, col in enumerate(columns):

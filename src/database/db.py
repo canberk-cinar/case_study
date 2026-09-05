@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = settings.DATABASE_URL
 
 if DATABASE_URL.startswith("sqlite:///./"):
-    # A relative sqlite path resolves against the process's cwd, not the repo root — wrong
+    # A relative sqlite path resolves against the process's cwd, not the repo root: wrong
     # whenever something runs from elsewhere (a notebook's kernel cwd is its own directory, not
     # the repo root). Anchor it explicitly, the same way config.py anchors every other path.
     db_filename = DATABASE_URL.removeprefix("sqlite:///./")
@@ -34,7 +34,7 @@ def get_db():
 
 
 def run_migrations():
-    """Creates all tables directly from the ORM models. No Alembic yet — this case study's schema
+    """Creates all tables directly from the ORM models. No Alembic yet: this case study's schema
     has no history to migrate; add Alembic when a real migration (not a fresh create_all) is
     actually needed."""
     from src.database import models  # noqa: F401  (registers models on Base.metadata)

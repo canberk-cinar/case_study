@@ -1,13 +1,13 @@
-"""Case 8 — Strategy pattern, mirroring embeddings.py: LLMProvider is the swappable generation
-interface, selected behind config (container.py's `llm_provider` Selector) — no caller needs to
+"""Case 8: Strategy pattern, mirroring embeddings.py: LLMProvider is the swappable generation
+interface, selected behind config (container.py's `llm_provider` Selector): no caller needs to
 know or care which one is active.
 
 OllamaLLMProvider calls Ollama's local `/api/generate` REST endpoint directly via httpx.
-OpenRouterLLMProvider calls any OpenAI-compatible `/chat/completions` endpoint the same way — same
-httpx-only style, no `langchain`/`openai` SDK dependency added just for this. Added when the case
-study team approved OpenRouter's free tier as a stand-in for local Ollama on this machine's limited
-RAM (Case 9's RAM constraint) — the provider Strategy this file already had is exactly what made
-that a config change instead of a rewrite.
+OpenRouterLLMProvider calls any OpenAI-compatible `/chat/completions` endpoint the same way: same
+httpx-only style, no `langchain`/`openai` SDK dependency added just for this. OpenRouter's free
+tier is used as a stand-in for local Ollama on this machine's limited RAM (Case 9's RAM
+constraint): the provider Strategy this file already had is exactly what made that a config
+change instead of a rewrite.
 """
 from abc import ABC, abstractmethod
 
@@ -49,7 +49,7 @@ class OllamaLLMProvider(LLMProvider):
 
 
 class OpenRouterLLMProvider(LLMProvider):
-    """Any OpenAI-compatible `/chat/completions` endpoint, not just OpenRouter specifically — the
+    """Any OpenAI-compatible `/chat/completions` endpoint, not just OpenRouter specifically: the
     same shape would work unchanged against Ollama's own OpenAI-compatible endpoint or another
     OpenAI-compatible provider, by base_url/api_key/model alone."""
 

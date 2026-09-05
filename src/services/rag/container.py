@@ -1,12 +1,12 @@
-"""Case 8 — dependency_injector Container: wires provider selection behind config, mirroring Case
-7's RuleEngineContainer pattern. Two independent Selectors:
-  - `config.embedding_provider` ("tfidf"|"ollama"|"openrouter") — defaults to "openrouter" now
-    that OpenRouter's `/embeddings` endpoint (confirmed OpenAI-compatible) is available with a
-    genuinely free, retrieval-quality-focused model (NVIDIA Nemotron 3 Embed 1B). TF-IDF stays
-    available as the fully local, zero-network fallback (e.g. for offline notebook runs).
-  - `config.llm_provider` ("ollama"|"openrouter") — defaults to "openrouter" now that the case
-    study team approved it as this machine's local-Ollama stand-in (Case 9's RAM constraint);
-    swapping back to "ollama" once it's installed is a config-only change, no code change.
+"""Case 8: dependency_injector Container: wires provider selection behind config, mirroring Case
+7's RuleEngineContainer pattern. Two independent Selectors, both driven off ONE .env switch
+(`settings.LLM_PROVIDER`, "openrouter"|"ollama") so swapping the whole RAG pipeline between cloud
+and local is a single-line .env change: no code change:
+  - `config.embedding_provider` ("tfidf"|"ollama"|"openrouter"): `LLM_PROVIDER` only ever feeds
+    it "ollama" or "openrouter"; `tfidf` remains selectable manually (e.g. `container.config.
+    embedding_provider.from_value("tfidf")` in a notebook) as a fully local, zero-network fallback,
+    but isn't part of the single-switch swap since there's no TF-IDF *chat* model to pair it with.
+  - `config.llm_provider` ("ollama"|"openrouter"): directly mirrors `LLM_PROVIDER`.
 
 A caller only ever asks the container for `rag_pipeline`, never constructs a provider directly.
 """
@@ -18,10 +18,10 @@ from src.services.rag.llm import OllamaLLMProvider, OpenRouterLLMProvider
 from src.services.rag.pipeline import RAGPipeline
 
 DEFAULT_CONFIG = {
-    "embedding_provider": "openrouter",  # "tfidf" | "ollama" | "openrouter"
+    "embedding_provider": settings.LLM_PROVIDER,  # "tfidf" | "ollama" | "openrouter"
     "ollama_embedding_model": "all-minilm",
     "openrouter_embedding_model": settings.EMBEDDING_MODEL,
-    "llm_provider": "openrouter",  # "ollama" | "openrouter"
+    "llm_provider": settings.LLM_PROVIDER,  # "ollama" | "openrouter"
     "ollama_llm_model": "smollm2:360m",
     "openrouter_model": settings.LLM_MODEL,
     "openrouter_api_key": settings.LLM_API_KEY,

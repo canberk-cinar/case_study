@@ -1,9 +1,9 @@
-"""Case 10 — top-level API container: composes Case 7's RuleEngineContainer and Case 8's
+"""Case 10: top-level API container: composes Case 7's RuleEngineContainer and Case 8's
 RAGContainer (both already built, not duplicated here) behind dependency_injector's FastAPI wiring
-(`@inject` + `Provide[...]`) — the bonus requirement's DI/Container mechanism, applied where it
+(`@inject` + `Provide[...]`): the bonus requirement's DI/Container mechanism, applied where it
 manages real, configurable objects (RuleEngine, RAGPipeline). Trivial per-request state (the DB
 session) still goes through FastAPI's own `Depends(get_db)`, matching the reference project's own
-convention — DI everywhere would be DI for its own sake, not for a real need.
+convention: DI everywhere would be DI for its own sake, not for a real need.
 """
 from dependency_injector import containers, providers
 

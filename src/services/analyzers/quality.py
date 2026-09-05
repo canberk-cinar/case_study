@@ -1,11 +1,11 @@
-"""Case 1 — data quality analysis over the merged Parquet file.
+"""Case 1: data quality analysis over the merged Parquet file.
 
 Covers: duplicate rows, duplicate TransactionIDs, duplicate (value-identical) column pairs,
 business-rule consistency checks, IQR/MAD-based outlier ratios, and text-value consistency
-(whitespace/case collisions) — closed out with a weighted quality scorecard.
+(whitespace/case collisions): closed out with a weighted quality scorecard.
 
 Reuses column_types.py's per-column profile (dtype, nunique, min/max, ...) instead of
-recomputing it — the same statistics answer two different questions (typing vs. quality), no
+recomputing it: the same statistics answer two different questions (typing vs. quality), no
 reason to scan the file twice for them. Everything else stays column-batched or reads only a
 narrow, targeted set of columns, for the same memory reasons as missingness.py/column_types.py.
 """
@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 COUNT_COLUMN_PATTERN = re.compile(r"^C\d+$")
 
 # Modified z-score constant (0.6745 makes MAD comparable to standard deviation under normality)
-# and the conventional outlier threshold — Iglewicz & Hoaglin's rule of thumb, not tuned per column.
+# and the conventional outlier threshold: Iglewicz & Hoaglin's rule of thumb, not tuned per column.
 MAD_CONSISTENCY_CONSTANT = 0.6745
 MAD_OUTLIER_THRESHOLD = 3.5
 IQR_OUTLIER_MULTIPLIER = 1.5
 
-# Scorecard weights — duplicate TransactionIDs would mean the merge itself is broken (most
+# Scorecard weights: duplicate TransactionIDs would mean the merge itself is broken (most
 # severe); duplicate rows and business-rule violations are real data problems; outliers are the
 # least severe since a fraud dataset is expected to have genuine extreme values.
 QUALITY_WEIGHTS = {
@@ -80,8 +80,8 @@ def check_duplicate_transaction_ids(parquet_path: Path) -> dict:
 
 def find_duplicate_columns(profile: pd.DataFrame, parquet_path: Path) -> pd.DataFrame:
     """Value-identical column pairs. Cheap fingerprint first (dtype, non-null count, nunique,
-    min, max — already computed by column_types.profile_columns), verified only within groups
-    that share a fingerprint, reading just those columns — avoids comparing all 434*433/2 pairs
+    min, max: already computed by column_types.profile_columns), verified only within groups
+    that share a fingerprint, reading just those columns: avoids comparing all 434*433/2 pairs
     directly. Expected to surface real hits inside the V-column families found in the
     missing-pattern analysis."""
     fingerprint_cols = ["physical_dtype", "non_null_count", "nunique", "min", "max"]
@@ -177,7 +177,7 @@ def compute_outlier_ratios(parquet_path: Path, numeric_columns: list[str], batch
 
 
 def check_text_consistency(parquet_path: Path, text_columns: list[str]) -> pd.DataFrame:
-    """Flags text columns where distinct values collapse under case/whitespace normalization —
+    """Flags text columns where distinct values collapse under case/whitespace normalization:
     e.g. "gmail.com" vs "gmail.com " being counted as different categories would silently
     fragment a categorical encoding downstream."""
     if not text_columns:
@@ -265,7 +265,7 @@ def run() -> dict:
     print(dup_cols.to_string(index=False))
     print("\n=== Consistency checks ===")
     print(consistency.to_string(index=False))
-    print("\n=== Outlier ratio — top 10 columns ===")
+    print("\n=== Outlier ratio: top 10 columns ===")
     print(outliers.head(10).to_string(index=False))
     print(f"\n=== Text inconsistencies ({len(text_consistency)} columns affected) ===")
     print(text_consistency.to_string(index=False))

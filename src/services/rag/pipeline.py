@@ -1,20 +1,20 @@
-"""Case 8 — RAGPipeline: Facade over chunking, embedding, storage, vector search, prompt-building,
-and generation — three methods hide the whole multi-step flow:
-  - ingest(db, documents): chunk -> embed -> persist. Cannot degrade gracefully like answer() —
-    retrieval is impossible without embeddings — so an unreachable/unauthorized embedding
+"""Case 8: RAGPipeline: Facade over chunking, embedding, storage, vector search, prompt-building,
+and generation: three methods hide the whole multi-step flow:
+  - ingest(db, documents): chunk -> embed -> persist. Cannot degrade gracefully like answer(),
+    since retrieval is impossible without embeddings: an unreachable or unauthorized embedding
     provider raises RuntimeError with a clear cause instead of a raw httpx exception.
   - answer(db, question): retrieve -> inject context into a prompt -> generate. Degrades
-    gracefully (never raises) if the LLM provider is unreachable — returns the retrieval +
+    gracefully (never raises) if the LLM provider is unreachable: returns the retrieval +
     constructed prompt with `answer=None` and an explanatory `note`, so retrieval and context
     injection stay independently verifiable without Ollama running.
 
-Turning a Case 7 rule verdict into a flagged-transaction question is NOT this pipeline's concern —
+Turning a Case 7 rule verdict into a flagged-transaction question is NOT this pipeline's concern:
 that's Case 9's policy_explanation agent's own task-specific prompt
 (agents/policy_explanation/static/question_template.json), kept out of this generic module on
 purpose so RAGPipeline stays usable by any caller with any question, agent or not.
 
 One constraint worth stating plainly: the SAME RAGPipeline instance (and therefore the same
-embedding_provider instance) must be used for both ingest() and answer() in one run — TF-IDF's
+embedding_provider instance) must be used for both ingest() and answer() in one run: TF-IDF's
 vectorizer only knows its vocabulary because embed_documents() fit it during ingest(); a fresh,
 unfitted provider can't embed a query. Ollama's provider has no such constraint (it's a fixed
 pretrained model), but the API here is intentionally uniform across both.
@@ -39,7 +39,7 @@ class RAGPipeline:
         self.top_k = top_k
 
     def ingest(self, db: Session, documents: list[tuple[str, str, str]]) -> int:
-        """documents: (title, source, content) tuples. Idempotent — clears any previously ingested
+        """documents: (title, source, content) tuples. Idempotent: clears any previously ingested
         knowledge base first, so re-running a notebook cell doesn't duplicate documents."""
         clear_knowledge_base(db)
 
@@ -55,7 +55,7 @@ class RAGPipeline:
             embeddings = self.embedding_provider.embed_documents(all_texts)
         except httpx.HTTPError as exc:
             raise RuntimeError(
-                f"Embedding generation failed ({self.embedding_provider.name}): {exc} — check "
+                f"Embedding generation failed ({self.embedding_provider.name}): {exc}: check "
                 "LLM_API_KEY in .env and network access, then retry ingest(). Unlike answer(), "
                 "ingest() cannot degrade gracefully: retrieval is impossible without embeddings."
             ) from exc
@@ -106,6 +106,6 @@ class RAGPipeline:
             note = None
         except httpx.HTTPError as exc:
             answer_text = None
-            note = f"LLM generation failed ({self.llm_provider.name}): {exc} — showing retrieval + prompt only."
+            note = f"LLM generation failed ({self.llm_provider.name}): {exc}: showing retrieval + prompt only."
 
         return {"question": question, "sources": retrieved, "prompt": prompt, "answer": answer_text, "note": note}

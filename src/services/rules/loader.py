@@ -1,10 +1,10 @@
-"""Case 7 — Factory pattern: RuleLoader.load(path) turns a YAML or JSON rules file (dispatched by
+"""Case 7: Factory pattern: RuleLoader.load(path) turns a YAML or JSON rules file (dispatched by
 file extension) into a list of Rule objects, building each rule's Condition tree recursively via
-_build_condition — the one place in this package that knows how to translate the raw dict schema
+_build_condition: the one place in this package that knows how to translate the raw dict schema
 (all_of/any_of/not/field+operator+value) into Condition instances. Callers never construct
 Condition or Rule objects by hand from parsed config; they always go through this factory.
 
-Schema (same shape in YAML and JSON) — explicit if/then, the literal shape of if-then evaluation:
+Schema (same shape in YAML and JSON): explicit if/then, the literal shape of if-then evaluation:
     rules:
       - id: str
         name: str

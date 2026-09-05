@@ -7,7 +7,7 @@ from ..db import Base
 class Artifact(Base):
     """
     Tracks where a generated file (parquet, profile.json, report.md, ...) lives and what it
-    contains — not the data itself. Large tabular outputs (e.g. the merged transaction+identity
+    contains: not the data itself. Large tabular outputs (e.g. the merged transaction+identity
     parquet) stay on disk for columnar, memory-bounded reads; only the pointer and shape go here,
     so any case can look up "what was last produced, when, how big" without re-reading the file.
     """

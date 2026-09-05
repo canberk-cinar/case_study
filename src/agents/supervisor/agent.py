@@ -1,10 +1,10 @@
-"""Case 9 — Facade: run_agentic_analysis(transaction_id, rule_engine, rag_pipeline) is the single
-entry point a caller uses — hides the whole multi-agent graph behind one call, the same role as
+"""Case 9: Facade: run_agentic_analysis(transaction_id, rule_engine, rag_pipeline) is the single
+entry point a caller uses: hides the whole multi-agent graph behind one call, the same role as
 the reference project's supervisor/agent.py::run_supervisor.
 
 rule_engine/rag_pipeline default to building a fresh ApiContainer's instances when omitted (e.g. a
 notebook calling this directly, outside a running API). Case 10's /agent route always passes its
-own DI-container-sourced instances explicitly instead of relying on this default — every request-
+own DI-container-sourced instances explicitly instead of relying on this default: every request-
 path caller then shares the same configured RuleEngine/RAGPipeline as the rest of the API, closing
 the one place (this function) that used to build its own container internally.
 """
@@ -23,7 +23,7 @@ def run_agentic_analysis(
     rule_engine: RuleEngine | None = None,
     rag_pipeline: RAGPipeline | None = None,
 ) -> dict:
-    logger.info("run_agentic_analysis — transaction_id=%s", transaction_id)
+    logger.info("run_agentic_analysis: transaction_id=%s", transaction_id)
 
     if rule_engine is None or rag_pipeline is None:
         from src.container import build_container  # local import avoids a module-load-time cycle
@@ -53,5 +53,5 @@ def run_agentic_analysis(
         "rule_verdict": result.get("rule_verdict"),
         "policy_explanation": result.get("policy_explanation"),
     }
-    logger.info("run_agentic_analysis — done, risk_level=%s", report["risk_level"])
+    logger.info("run_agentic_analysis: done, risk_level=%s", report["risk_level"])
     return report

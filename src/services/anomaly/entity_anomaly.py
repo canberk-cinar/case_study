@@ -1,22 +1,22 @@
-"""Case 4 — entity anomaly detection: how anomalous is a transaction relative to the same card1's
-OWN established behavior — not the global population (column_anomaly.py) and not a handful of
+"""Case 4: entity anomaly detection: how anomalous is a transaction relative to the same card1's
+OWN established behavior: not the global population (column_anomaly.py) and not a handful of
 columns considered jointly (multivariate_anomaly.py), but this one entity's history.
 
 Reuses Case 3's already-built causal ("_so_far") entity/relational features rather than
 re-deriving anything: features.entity.build_entity_features gives the amount-deviation signal
 (user_amount_zscore), features.relational.build_relational_features gives the behavioral-novelty
 signals (is_new_addr1_for_card, is_new_device_for_card). Case 4 turns those feature columns into
-one explainable anomaly score for this layer — Case 3 built the inputs, this is what consumes them.
+one explainable anomaly score for this layer: Case 3 built the inputs, this is what consumes them.
 
 Two components, both computed without ever looking at isFraud:
-  - amount component: |user_amount_zscore| — how far this transaction's amount sits from the
+  - amount component: |user_amount_zscore|: how far this transaction's amount sits from the
     card's own historical average, in the card's own historical spread.
   - novelty component: NEW_ADDR_WEIGHT * is_new_addr1_for_card + NEW_DEVICE_WEIGHT *
     is_new_device_for_card, counted only once the card has SOME established history
-    (user_transaction_count_so_far > 0) — for a brand-new card, every address/device is trivially
+    (user_transaction_count_so_far > 0): for a brand-new card, every address/device is trivially
     "new," so novelty is not a meaningful signal on a card's very first transaction. Weights are
     equal (1.0 each) and chosen only to sit on the same rough scale as a typical |z-score|
-    (median ~0.43 in this dataset) — NOT tuned against isFraud, which stays out of this module
+    (median ~0.43 in this dataset): NOT tuned against isFraud, which stays out of this module
     entirely; see the notebook for a purely descriptive check of how each component relates to
     the label after the fact.
 

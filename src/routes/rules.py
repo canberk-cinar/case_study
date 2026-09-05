@@ -1,7 +1,7 @@
-"""Case 10 — GET /rules/evaluate/{transaction_id}: Case 7's raw structured rule evaluation (which
-rules fired, verdict) — no per-rule prose message (see /explain for that richer view). RuleEngine
+"""Case 10: GET /rules/evaluate/{transaction_id}: Case 7's raw structured rule evaluation (which
+rules fired, verdict): no per-rule prose message (see /explain for that richer view). RuleEngine
 comes from the DI container (ApiContainer.rule_engine_container.rule_engine), not constructed
-inline — swapping the active rules file (container.rule_engine_container.config.rules_path) needs
+inline: swapping the active rules file (container.rule_engine_container.config.rules_path) needs
 no route code change.
 """
 import logging

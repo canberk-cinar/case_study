@@ -1,4 +1,4 @@
-# [EXPERIMENTAL — No Counterpart in the Rule Engine] Crypto Exchange Transaction Policy
+# [EXPERIMENTAL: No Counterpart in the Rule Engine] Crypto Exchange Transaction Policy
 
 This policy is a fictional example added purely to demonstrate that the RAG knowledge base
 operates on its own content, not on the actual rules in the codebase. It has NO counterpart in the

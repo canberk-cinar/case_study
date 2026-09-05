@@ -1,11 +1,11 @@
-"""Case 8 — Builder pattern: PromptBuilder assembles the final LLM prompt from optional parts
+"""Case 8: Builder pattern: PromptBuilder assembles the final LLM prompt from optional parts
 (system instructions, retrieved context chunks, the question) added independently and in any
-order, then finalized with .build() — this IS "LLM context injection": the retrieved chunks'
+order, then finalized with .build(): this IS "LLM context injection": the retrieved chunks'
 actual text gets woven into the prompt the model will see, with explicit source numbering so a
 generated answer can point back to which policy document supported it.
 
 The default system instructions are a static asset (static/system_prompt.json), not a hardcoded
-Python string — this is RAG's own general-purpose prompt (any caller of RAGPipeline uses it, not
+Python string: this is RAG's own general-purpose prompt (any caller of RAGPipeline uses it, not
 just Case 9's policy_explanation agent), so it lives here rather than under any one agent's folder.
 """
 import json

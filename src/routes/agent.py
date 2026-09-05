@@ -1,7 +1,7 @@
-"""Case 10 — GET /agent/{transaction_id}: Case 9's run_agentic_analysis() — the full multi-agent
+"""Case 10: GET /agent/{transaction_id}: Case 9's run_agentic_analysis(): the full multi-agent
 orchestration (feature engineering -> anomaly scoring -> rule engine -> conditional RAG-grounded
 explanation) as one endpoint. RuleEngine/RAGPipeline now come from the DI container, same as
-/rules/evaluate, /explain, and /rag/query — this route no longer builds its own RAGContainer
+/rules/evaluate, /explain, and /rag/query: this route no longer builds its own RAGContainer
 internally, closing the one inconsistency where /agent was the only endpoint not wired through
 ApiContainer.
 """

@@ -1,26 +1,26 @@
-"""Case 8 — Strategy pattern: EmbeddingProvider is the common interface, swappable at the
-container/config level (EMBEDDING_PROVIDER=tfidf|ollama) without any caller needing to change.
+"""Case 8: Strategy pattern: EmbeddingProvider is the common interface, swappable at the
+container/config level (`LLM_PROVIDER=openrouter|ollama` in .env, or `embedding_provider=tfidf`
+directly on RAGContainer's config) without any caller needing to change.
 
-TfidfEmbeddingProvider is NOT a test mock — it's a genuine, fully local, zero-extra-dependency
-(scikit-learn is already a project dependency) embedding strategy, and it's what makes it possible
-to build and verify the ENTIRE retrieval pipeline (chunking -> storage -> vector search -> ranking)
-before Ollama is installed on this machine. Its one real constraint, inherent to TF-IDF rather than
-a shortcut taken here: the vectorizer must be fit on the knowledge base's own documents before it
-can embed a query — embed_documents() does that fit, embed_query() reuses it. Its vector space is
-also specific to the fitted vocabulary, so TF-IDF and Ollama embeddings are never comparable and
-must never be mixed in one vector_search.py index (models.py's `embedding_model` tag on every
+TfidfEmbeddingProvider is NOT a test mock: it's a genuine, fully local, zero-extra-dependency
+(scikit-learn is already a project dependency) embedding strategy, useful for building and
+verifying the ENTIRE retrieval pipeline (chunking -> storage -> vector search -> ranking) with no
+network dependency at all. Its one real constraint, inherent to TF-IDF rather than a shortcut
+taken here: the vectorizer must be fit on the knowledge base's own documents before it can embed a
+query: embed_documents() does that fit, embed_query() reuses it. Its vector space is also
+specific to the fitted vocabulary, so TF-IDF and Ollama/OpenRouter embeddings are never comparable
+and must never be mixed in one vector_search.py index (models.py's `embedding_model` tag on every
 stored chunk exists specifically to prevent that).
 
 OllamaEmbeddingProvider calls Ollama's local REST API directly via httpx (already a project
-dependency) — no new dependency needed, no `ollama` PyPI package required.
+dependency): no new dependency needed, no `ollama` PyPI package required.
 
 OpenRouterEmbeddingProvider calls OpenRouter's OpenAI-compatible `/embeddings` endpoint the same
-httpx-only way — added once the case study team approved OpenRouter as this machine's local-Ollama
-stand-in (Case 9's RAM constraint) and OpenRouter's free embedding tier (NVIDIA Nemotron 3 Embed
-1B, chosen over LiquidAI's LFM2.5-Embedding-350M for retrieval quality — see
-notebooks/case_08_rag_pipeline.ipynb's multi-concept-query finding) became available. TF-IDF
-remains the default/fallback (config.py's DEFAULT_CONFIG) — this provider is opt-in via
-`embedding_provider: openrouter` in RAGContainer's config.
+httpx-only way. It's the default provider (config.py's `LLM_PROVIDER`): this machine's RAM
+constraint (Case 9) rules out running Ollama locally, and OpenRouter's free embedding tier (NVIDIA
+Nemotron 3 Embed 1B, chosen over LiquidAI's LFM2.5-Embedding-350M for retrieval quality: see
+notebooks/case_08_rag_pipeline.ipynb's multi-concept-query finding) covers the gap. TF-IDF remains
+available as a fully local fallback via `embedding_provider: tfidf` on RAGContainer's config.
 """
 from abc import ABC, abstractmethod
 

@@ -1,11 +1,11 @@
-"""Case 10 follow-up — builds the precomputed scoring artifact (scored_transactions table) that
+"""Case 10 follow-up: builds the precomputed scoring artifact (scored_transactions table) that
 the API and rule engine read from instead of recomputing every feature and anomaly layer on every
 request. Run whenever scoring/feature logic changes:
 
     python -m src.pipelines.build_scoring_artifact
 
 Reuses the exact same assembly Case 7's rule engine and Case 10's routes already relied on
-(previously duplicated inline in services/rules/data.py::load_transaction_row) — this script is
+(previously duplicated inline in services/rules/data.py::load_transaction_row): this script is
 the one place that runs it over the FULL dataset once and persists the result; the per-request
 read path (data.py) becomes a single indexed lookup.
 """
@@ -73,7 +73,7 @@ def build():
     finally:
         close(db)
 
-    logger.info("done — %d rows in scored_transactions", n)
+    logger.info("done: %d rows in scored_transactions", n)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def load_csv(path: Path) -> pd.DataFrame:
 
 def merge_data(transaction: pd.DataFrame, identity: pd.DataFrame) -> pd.DataFrame:
     """Left-joins identity onto transaction on TransactionID. Left join because identity only
-    covers ~24% of transactions — every transaction row must be kept, with NaN identity columns
+    covers ~24% of transactions: every transaction row must be kept, with NaN identity columns
     where there's no match."""
     return transaction.merge(identity, on="TransactionID", how="left")
 
@@ -28,7 +28,7 @@ def save_merged(df: pd.DataFrame, path: Path) -> None:
 
 
 def record_merge_artifact(df: pd.DataFrame, path: Path) -> None:
-    """Writes a pointer row to the DB (path + shape) — not the data itself. The parquet file stays
+    """Writes a pointer row to the DB (path + shape): not the data itself. The parquet file stays
     the source of truth for the actual rows so later steps can keep reading it column-batched."""
     db = db_services.new_session()
     try:

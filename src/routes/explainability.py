@@ -1,6 +1,6 @@
-"""Case 10 — GET /explain/{transaction_id}: Case 7's RuleEngine.explain() — the same evaluation as
+"""Case 10: GET /explain/{transaction_id}: Case 7's RuleEngine.explain(): the same evaluation as
 /rules/evaluate, but with per-rule human-readable messages/conditions interpolated with this
-transaction's real values. Same DI-provided RuleEngine as /rules/evaluate — one configured engine,
+transaction's real values. Same DI-provided RuleEngine as /rules/evaluate: one configured engine,
 two views over it.
 """
 import logging

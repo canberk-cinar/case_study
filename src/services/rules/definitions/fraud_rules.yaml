@@ -1,7 +1,7 @@
-# Case 7 — canonical fraud/anomaly rule set (10 rules), explicit if-then structure.
+# Case 7: canonical fraud/anomaly rule set (10 rules), explicit if-then structure.
 #
 # Every numeric threshold below was grounded against the real dataset's own percentiles before
-# being written here (verified in notebooks/case_07_rule_engine.ipynb) — none were guessed, and
+# being written here (verified in notebooks/case_07_rule_engine.ipynb); none were guessed, and
 # none were tuned against isFraud. Two amount thresholds appear on purpose, not by oversight:
 # ELEVATED (~median, 70.0) is used only in rule fraud_r01, where it's already combined with two
 # other rare conditions (foreign country, night hour) so a lower bar still yields a specific rule;
@@ -9,9 +9,9 @@
 # amount on their own to mean anything.
 #
 # `then.severity` reflects operational/domain risk judgment (how dangerous this PATTERN is, by
-# common fraud-industry reasoning), not this dataset's measured fraud rate for each rule — that
+# common fraud-industry reasoning), not this dataset's measured fraud rate for each rule: that
 # would risk tuning a "business rule" to one historical sample. `then.action` is the explicit
-# if-then consequence (BLOCK/REVIEW/FLAG) — a separate axis from severity: two rules can share a
+# if-then consequence (BLOCK/REVIEW/FLAG), a separate axis from severity: two rules can share a
 # severity but warrant a different action. The notebook validates each rule's real-world alignment
 # AFTER the fact (isFraud used only for that descriptive check), and reports the results honestly
 # even where a rule's measured effect is weaker than its assigned severity would suggest
@@ -39,11 +39,11 @@ rules:
       severity: CRITICAL
       description: >-
         Elevated amount ({TransactionAmt}) combined with a foreign billing region (addr2={addr2})
-        during a historically low-volume, high-fraud-rate hour window (04:00-09:00) — the exact
+        during a historically low-volume, high-fraud-rate hour window (04:00-09:00), the exact
         combination named as an example in the case brief.
 
   - id: fraud_r02
-    name: "Velocity — Rapid Repeat Transaction"
+    name: "Velocity: Rapid Repeat Transaction"
     priority: 2
     if:
       field: user_seconds_since_last_transaction
@@ -53,7 +53,7 @@ rules:
       action: REVIEW
       severity: HIGH
       description: >-
-        Only {user_seconds_since_last_transaction} seconds since this card's last transaction —
+        Only {user_seconds_since_last_transaction} seconds since this card's last transaction, a
         classic card-testing / automated-fraud velocity signal.
 
   - id: fraud_r03
@@ -71,8 +71,8 @@ rules:
       action: REVIEW
       severity: HIGH
       description: >-
-        Both the device and the billing address are new for this card in the same transaction —
-        a common account-takeover signature (is_new_device_for_card={is_new_device_for_card},
+        Both the device and the billing address are new for this card in the same transaction, a
+        common account-takeover signature (is_new_device_for_card={is_new_device_for_card},
         is_new_addr1_for_card={is_new_addr1_for_card}).
 
   - id: fraud_r04
@@ -91,7 +91,7 @@ rules:
       severity: HIGH
       description: >-
         Amount z-score {user_amount_zscore} is more than 3 standard deviations from this card's
-        own historical average — statistically extreme even relative to its own past behavior,
+        own historical average, statistically extreme even relative to its own past behavior,
         not the global population.
 
   - id: fraud_r05
@@ -110,7 +110,7 @@ rules:
       severity: CRITICAL
       description: >-
         This card's very first observed transaction ({user_transaction_count_so_far} prior
-        transactions) is already for {TransactionAmt} — no track record to justify the amount.
+        transactions) is already for {TransactionAmt}, with no track record to justify the amount.
 
   - id: fraud_r06
     name: "Weekend Off-Hours High-Value"
@@ -131,10 +131,10 @@ rules:
       severity: MEDIUM
       description: >-
         High-value transaction ({TransactionAmt}) on a weekend during the historically low-volume
-        hour window — an unusual combination of context signals.
+        hour window, an unusual combination of context signals.
 
   - id: fraud_r07
-    name: "AI Anomaly Score — Extreme Tail"
+    name: "AI Anomaly Score: Extreme Tail"
     priority: 7
     if:
       field: final_raw_anomaly_score
@@ -145,7 +145,7 @@ rules:
       severity: HIGH
       description: >-
         final_raw_anomaly_score={final_raw_anomaly_score} is in the top 1% of the whole
-        statistical anomaly-detection pipeline (Cases 4-5) — the explicit bridge between the
+        statistical anomaly-detection pipeline (Cases 4-5), the explicit bridge between the
         AI-based scoring system and this rule engine.
 
   - id: fraud_r08
@@ -186,7 +186,7 @@ rules:
       severity: CRITICAL
       description: >-
         A brand-new billing address for this card, used again within
-        {user_seconds_since_last_transaction} seconds — the address-hopping pattern common to
+        {user_seconds_since_last_transaction} seconds, the address-hopping pattern common to
         fraud rings testing stolen card numbers against multiple drop addresses.
 
   - id: fraud_r10
@@ -204,5 +204,5 @@ rules:
       action: FLAG
       severity: LOW
       description: >-
-        dist1={dist1} is in the top 5% of measured distances in this dataset — a large mismatch
+        dist1={dist1} is in the top 5% of measured distances in this dataset, a large mismatch
         between billing and transaction location.

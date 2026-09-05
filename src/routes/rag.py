@@ -1,12 +1,12 @@
-"""Case 10 — POST /rag/query: Case 8's RAGPipeline, free-form question against the policy
+"""Case 10: POST /rag/query: Case 8's RAGPipeline, free-form question against the policy
 knowledge base. Optional `transaction_id` grounds the question in that transaction's rule verdict
-instead of a bare question — reuses Case 9's own question-framing prompt
+instead of a bare question: reuses Case 9's own question-framing prompt
 (agents/policy_explanation/static/question_template.json via build_flagged_transaction_question)
-rather than duplicating it here. RAGPipeline comes from the DI container — swapping embedding/LLM
+rather than duplicating it here. RAGPipeline comes from the DI container: swapping embedding/LLM
 provider (container.rag_container.config) needs no route code change.
 
 Re-ingests the (tiny, 8-document) knowledge base on every request rather than caching it across
-requests — simpler, and cheap at this scale (matches Case 8/9's own per-call ingest pattern);
+requests: simpler, and cheap at this scale (matches Case 8/9's own per-call ingest pattern);
 worth reconsidering only if the knowledge base grows much larger.
 """
 import logging
@@ -47,7 +47,7 @@ def rag_query(
     pipeline: RAGPipeline = Depends(Provide[ApiContainer.rag_container.rag_pipeline]),
     engine: RuleEngine = Depends(Provide[ApiContainer.rule_engine_container.rule_engine]),
 ):
-    logger.info("POST /rag/query — question=%r transaction_id=%s", body.question[:80], body.transaction_id)
+    logger.info("POST /rag/query: question=%r transaction_id=%s", body.question[:80], body.transaction_id)
     pipeline.ingest(db, _load_knowledge_base_documents())
 
     if body.transaction_id is not None:

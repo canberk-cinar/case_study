@@ -43,7 +43,7 @@
       "then": {
         "action": "REVIEW",
         "severity": "HIGH",
-        "description": "Either the device or the address is new for this card — a looser any_of version of fraud_r03."
+        "description": "Either the device or the address is new for this card, a looser any_of version of fraud_r03."
       }
     }
   ]

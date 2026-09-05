@@ -1,7 +1,7 @@
-"""Case 1 — missing-data analysis over the merged transaction+identity Parquet file.
+"""Case 1: missing-data analysis over the merged transaction+identity Parquet file.
 
 Reads via PyArrow's columnar Parquet API directly, never materializing the full 434-column,
-590k-row frame in pandas — an Adapter over the storage layer, in the same spirit as
+590k-row frame in pandas: an Adapter over the storage layer, in the same spirit as
 services/readers.py's planned DataReader: analysis code gets plain arrays/DataFrames back, but the
 underlying access is column-batched (or metadata-only) to keep peak memory bounded regardless of
 column count.
@@ -18,7 +18,7 @@ from src.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Per-column missing-ratio buckets — separates "clean", "worth imputing", "worth flagging", and
+# Per-column missing-ratio buckets: separates "clean", "worth imputing", "worth flagging", and
 # "candidate to drop" columns at a glance.
 MISSING_RATIO_BUCKETS = [
     (0.0, "none"),
@@ -43,7 +43,7 @@ def _bucket(ratio: float) -> str:
 
 
 def compute_missing_ratios(parquet_path: Path) -> pd.DataFrame:
-    """Per-column null count/ratio, read straight from Parquet's row-group statistics — no row
+    """Per-column null count/ratio, read straight from Parquet's row-group statistics: no row
     data is loaded, so this stays cheap regardless of the file's width."""
     pf = pq.ParquetFile(parquet_path)
     num_rows = pf.metadata.num_rows
@@ -71,7 +71,7 @@ def compute_missing_ratios(parquet_path: Path) -> pd.DataFrame:
 
 def analyze_missing_patterns(parquet_path: Path, batch_size: int = 25) -> tuple[pd.DataFrame, np.ndarray]:
     """Single batched pass over all columns (batch_size at a time, not all 434 at once): hashes
-    each column's null bitmap to find columns that are null in exactly the same rows — reveals
+    each column's null bitmap to find columns that are null in exactly the same rows: reveals
     structure a flat per-column ratio table can't, e.g. blocks of V-columns always missing
     together. Accumulates a per-row null count along the way so the file is only read once."""
     pf = pq.ParquetFile(parquet_path)

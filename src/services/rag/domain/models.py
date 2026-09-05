@@ -1,4 +1,4 @@
-"""Case 8 — lightweight in-memory domain objects for the RAG service layer.
+"""Case 8: lightweight in-memory domain objects for the RAG service layer.
 
 Deliberately NOT the SQLAlchemy ORM objects from src/database/models/rag.py: a chunk pulled out of
 a DB session and handed to vector_search.py / prompt.py needs to keep working after that session

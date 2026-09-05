@@ -1,22 +1,22 @@
-"""Case 7 — RuleEngine: evaluates every enabled rule against a DataFrame at once (vectorized,
-Series[bool] per rule — no row-by-row Python loop for the actual condition checks, consistent with
+"""Case 7: RuleEngine: evaluates every enabled rule against a DataFrame at once (vectorized,
+Series[bool] per rule: no row-by-row Python loop for the actual condition checks, consistent with
 the rest of this project), then reduces each row's fired-rule set to one verdict.
 
 Two verdicts are computed side by side in evaluate_all, not one: `verdict_rule_id`/`verdict_severity`
-(the severity-driven Chain of Responsibility result — resolution.py's SeverityHandler) and
+(the severity-driven Chain of Responsibility result: resolution.py's SeverityHandler) and
 `priority_verdict_rule_id` (resolution.py's resolve_by_priority, severity ignored, lowest priority
 number wins outright). Both are vectorized the same way (idxmax over priority-ordered boolean
 columns). Keeping both, rather than only the CoR one, is what makes "priority" a real, separately-
-measurable mechanism — the notebook reports how often the two verdicts agree or disagree, instead
+measurable mechanism: the notebook reports how often the two verdicts agree or disagree, instead
 of priority only ever mattering as an invisible tie-break inside the severity verdict.
 
 Two entry points for explainability, one shared machinery (_build_explanation):
-  - explain(row): wraps a single transaction in a 1-row DataFrame and calls evaluate_all on it —
-    the exact same Condition.evaluate() / severity logic, no separate row-wise reimplementation —
+  - explain(row): wraps a single transaction in a 1-row DataFrame and calls evaluate_all on it
+    (the exact same Condition.evaluate() / severity logic, no separate row-wise reimplementation),
     then builds a human-readable report, and runs the actual object-oriented Chain of
     Responsibility (resolution.py) over the fired Rule objects, so the CoR pattern itself is
     genuinely exercised (not just its vectorized bulk equivalent).
-  - explain_batch(df, result): the actual "explainability output" deliverable — a structured list
+  - explain_batch(df, result): the actual "explainability output" deliverable: a structured list
     of full explanation records for MANY transactions at once, reusing an already-computed
     evaluate_all() result (no re-evaluation of conditions) rather than calling explain() in a loop.
 """
@@ -51,7 +51,7 @@ class RuleEngine:
                 continue
             any_fired = fired[ids].any(axis=1)
             # idxmax over priority-ordered boolean columns returns the first (lowest-priority-
-            # number) column that's True — exactly "highest-precedence fired rule at this
+            # number) column that's True: exactly "highest-precedence fired rule at this
             # severity," vectorized. Masked to NaN where nothing fired at this severity at all.
             primary = fired[ids].idxmax(axis=1).where(any_fired, other=None)
             severity_any[severity] = any_fired
@@ -113,7 +113,7 @@ class RuleEngine:
 
     def explain_batch(self, df: pd.DataFrame, result: pd.DataFrame | None = None) -> list[dict]:
         """The batch explainability output: one full explanation record per row in `df`, reusing
-        a precomputed evaluate_all() `result` when given (no redundant condition re-evaluation) —
+        a precomputed evaluate_all() `result` when given (no redundant condition re-evaluation);
         this is the actual deliverable, not the single-row explain() demos."""
         if result is None:
             result = self.evaluate_all(df)

@@ -1,5 +1,5 @@
-"""Case 8 — brute-force cosine similarity search over chunk embeddings held in memory. No ANN
-index (FAISS/HNSW) — at this knowledge base's scale (a handful of documents, a few dozen chunks
+"""Case 8: brute-force cosine similarity search over chunk embeddings held in memory. No ANN
+index (FAISS/HNSW): at this knowledge base's scale (a handful of documents, a few dozen chunks
 at most) an exact O(n) scan is both simpler and, in practice, as fast as building an index would
 be; this was decided against premature infrastructure for a dataset this small.
 """

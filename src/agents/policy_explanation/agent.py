@@ -1,13 +1,13 @@
-"""Case 9 — policy_explanation agent node: the ONE genuinely LLM-backed node in this graph. Wraps
+"""Case 9: policy_explanation agent node: the ONE genuinely LLM-backed node in this graph. Wraps
 Case 8's RAGPipeline for retrieval/context-injection/generation, but owns its own task-specific
 prompt content: the question template that turns a Case 7 rule verdict into a natural-language
 request (static/question_template.json). This is what makes it genuinely THIS agent's prompt,
 distinct from RAG's generic system instructions (services/rag/static/system_prompt.json), which
-apply to any RAGPipeline caller — the question TEMPLATE is specific to "explain a flagged
+apply to any RAGPipeline caller: the question TEMPLATE is specific to "explain a flagged
 transaction," this agent's one job; the system prompt is generic to "answer from these sources,"
 useful to any caller including Case 10's bare /rag/query.
 
-Takes the RAGPipeline as a parameter rather than building its own RAGContainer inline — graph.py's
+Takes the RAGPipeline as a parameter rather than building its own RAGContainer inline: graph.py's
 closures inject it from the same DI container Case 10's /rag/query route uses
 (ApiContainer.rag_container), so swapping the embedding/LLM provider is one config change that
 affects every consumer, not just the ones that happen to build their own container.
@@ -51,7 +51,7 @@ def build_flagged_transaction_question(explanation: dict) -> str:
 def explain_verdict(state: AgentState, pipeline: RAGPipeline) -> dict:
     transaction_id = state["transaction_id"]
     rule_verdict = state["rule_verdict"]
-    logger.info("explain_verdict — transaction_id=%s", transaction_id)
+    logger.info("explain_verdict: transaction_id=%s", transaction_id)
 
     question = build_flagged_transaction_question(rule_verdict)
 
@@ -62,7 +62,7 @@ def explain_verdict(state: AgentState, pipeline: RAGPipeline) -> dict:
     finally:
         close(db)
 
-    logger.info("explain_verdict — note=%s", result.get("note"))
+    logger.info("explain_verdict: note=%s", result.get("note"))
     return {
         "policy_explanation": {
             "question": result["question"],

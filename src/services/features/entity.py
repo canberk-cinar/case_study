@@ -1,18 +1,18 @@
-"""Case 3 — entity (card1) features for anomaly-detection models.
+"""Case 3: entity (card1) features for anomaly-detection models.
 
 Two families of amount aggregation, computed side by side and kept explicitly separate:
 
-  - Safe / causal ("_so_far") — uses only transactions strictly before the current one for the
+  - Safe / causal ("_so_far"): uses only transactions strictly before the current one for the
     same entity, ordered by TransactionDT. This is what a model can actually see at scoring time
     in production, so this is the only family safe to feed into a model.
-  - Reference-only ("_global") — the naive aggregate over ALL of an entity's transactions, past
+  - Reference-only ("_global"): the naive aggregate over ALL of an entity's transactions, past
     AND future. This leaks information a production model would never have (a transaction's own
     future isn't known when it's scored). Computed here purely so the notebook can show, with
     real numbers, how far the leaky version drifts from the safe one. LEAKAGE_UNSAFE_COLUMNS
     names exactly which output columns must never be used as model input.
 
 card1 is the entity, consistent with Case 2's entity_behavior.py. isFraud is not touched anywhere
-in this module — these are pure transaction-history features, no label involved.
+in this module: these are pure transaction-history features, no label involved.
 """
 from pathlib import Path
 
@@ -23,7 +23,7 @@ import pyarrow.parquet as pq
 ENTITY_COLUMN = "card1"
 SOURCE_COLUMNS = [ENTITY_COLUMN, "TransactionID", "TransactionAmt", "TransactionDT"]
 
-# Output columns that must never be used as model input — computed only for the notebook's
+# Output columns that must never be used as model input: computed only for the notebook's
 # leakage-comparison demonstration.
 LEAKAGE_UNSAFE_COLUMNS = {"user_avg_amount_global"}
 
@@ -44,7 +44,7 @@ def build_entity_features(parquet_path: Path) -> pd.DataFrame:
     with np.errstate(invalid="ignore", divide="ignore"):
         prior_avg = np.where(prior_count > 0, prior_sum / prior_count, np.nan)
 
-    # Std can't be derived by simple subtraction — compute inclusive expanding std, then shift by
+    # Std can't be derived by simple subtraction: compute inclusive expanding std, then shift by
     # one row within each group to exclude the current transaction.
     expanding_std_incl = grouped_amt.expanding().std().reset_index(level=0, drop=True)
     prior_std = expanding_std_incl.groupby(df[ENTITY_COLUMN]).shift(1).to_numpy()
@@ -58,7 +58,7 @@ def build_entity_features(parquet_path: Path) -> pd.DataFrame:
 
     seconds_since_last = df.groupby(ENTITY_COLUMN)["TransactionDT"].diff().to_numpy()
 
-    # Reference-only, leaky global average — see LEAKAGE_UNSAFE_COLUMNS / module docstring.
+    # Reference-only, leaky global average: see LEAKAGE_UNSAFE_COLUMNS / module docstring.
     global_avg = grouped_amt.transform("mean").to_numpy()
 
     return pd.DataFrame({
@@ -68,5 +68,5 @@ def build_entity_features(parquet_path: Path) -> pd.DataFrame:
         "user_std_amount_so_far": prior_std,
         "user_amount_zscore": zscore,
         "user_seconds_since_last_transaction": seconds_since_last,
-        "user_avg_amount_global": global_avg,  # LEAKAGE_UNSAFE — comparison only, never a model input
+        "user_avg_amount_global": global_avg,  # LEAKAGE_UNSAFE: comparison only, never a model input
     })

@@ -1,5 +1,5 @@
-"""Case 10 — GET /score/{transaction_id}: Case 5's precomputed final_raw_anomaly_score for one
-transaction. Fastest endpoint — no rule engine, no LLM, and (since the scoring artifact refactor)
+"""Case 10: GET /score/{transaction_id}: Case 5's precomputed final_raw_anomaly_score for one
+transaction. Fastest endpoint: no rule engine, no LLM, and (since the scoring artifact refactor)
 no per-request recomputation either: a single indexed lookup in scored_transactions.
 """
 import logging

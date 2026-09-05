@@ -1,18 +1,18 @@
-"""Case 5 — normalizing the four anomaly layers' scores onto a common [0,1] scale, so they can
+"""Case 5: normalizing the four anomaly layers' scores onto a common [0,1] scale, so they can
 later be weighted and combined into one risk score.
 
 Percentile-rank normalization (each score's rank within its own distribution, scaled to [0,1]) is
 used as the primary method rather than min-max scaling: Case 4 documented, in every single layer,
 extreme outliers dominating the raw score (column_anomaly: max_abs_zscore over 100; entity_anomaly:
 max score 8028 against a median under 1; temporal_anomaly: max score 495). Min-max scaling would
-let one such outlier compress the entire rest of that layer's distribution into a sliver near 0 —
+let one such outlier compress the entire rest of that layer's distribution into a sliver near 0,
 exactly the sensitivity-to-outliers problem Case 1-4 spent considerable effort working around with
 robust (MAD-based) statistics in the first place. Percentile rank sidesteps this entirely: it only
 cares about ORDERING, not magnitude, so one absurd outlier can't distort where everything else
 lands.
 
 Both methods are computed here, side by side (not just rank alone), so the notebook can show
-concretely why rank-based was chosen rather than just asserting it — the same "compare, don't just
+concretely why rank-based was chosen rather than just asserting it: the same "compare, don't just
 pick one" instinct used throughout this project (quality.py's IQR vs MAD, multivariate_anomaly.py's
 Mahalanobis vs Isolation Forest).
 """

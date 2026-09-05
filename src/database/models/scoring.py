@@ -4,7 +4,7 @@ from ..db import Base
 
 
 class ScoredTransaction(Base):
-    """Precomputed per-transaction scoring artifact — the API's read model.
+    """Precomputed per-transaction scoring artifact: the API's read model.
 
     Case 1-9 recompute everything from merged_transactions.parquet on every call, which is right
     for notebooks (full-table analytical scans, memory-bounded columnar reads) but wrong for an
@@ -12,7 +12,7 @@ class ScoredTransaction(Base):
     recomputation of every feature and anomaly layer.
 
     This table stores exactly the columns the rule engine's conditions (fraud_rules.yaml) and the
-    API reference, keyed by TransactionID as the primary key — SQLite's B-tree index turns that
+    API reference, keyed by TransactionID as the primary key: SQLite's B-tree index turns that
     point lookup into microseconds without loading 590k rows. Parquet stays the right home for
     merged_transactions.parquet (scan-heavy, columnar); this is the opposite access pattern
     (single-row lookup), so it gets the opposite store. Rebuild with

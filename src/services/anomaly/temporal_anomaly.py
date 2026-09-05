@@ -1,24 +1,24 @@
-"""Case 4 — temporal anomaly detection: does the amount look unusual for this hour of day, and
+"""Case 4: temporal anomaly detection: does the amount look unusual for this hour of day, and
 does the LOCAL activity level around this transaction's time look like a burst.
 
 Two components, both computed without ever looking at isFraud:
-  - amount component: reused directly from Case 3's context.py (amount_zscore_within_hour) — how
+  - amount component: reused directly from Case 3's context.py (amount_zscore_within_hour): how
     far this transaction's amount sits from the causal (so-far) average for its hour_of_day. Not
     re-derived; this layer just adopts it as one of its two signals. temporal_anomaly_hour_history
-    reports how many prior transactions that hour_of_day group had already seen — the same
+    reports how many prior transactions that hour_of_day group had already seen: the same
     "shallow history makes a causal statistic unstable" pattern column_anomaly.py's scored_count
     and entity_anomaly.py's history_depth already surfaced shows up here too (verified: the
     highest amount-component values in this dataset came from a transaction's hour_of_day group
     having only 2 prior observations, both nearly identical, collapsing prior_std toward zero).
   - burst component: a genuinely new signal here. Transactions are binned into real (day,
-    hour_of_day) blocks (182 days x 24 hours = 4,368 blocks, ~182 observations per hour_of_day —
+    hour_of_day) blocks (182 days x 24 hours = 4,368 blocks, ~182 observations per hour_of_day,
     enough for a stable mean/std, no degeneracy risk the way the sparse numeric columns had).
     Each block's transaction count is scored against the mean/std of counts sharing the same
-    hour_of_day, not the whole dataset's — a burst at 3am is compared to typical 3am volume
+    hour_of_day, not the whole dataset's: a burst at 3am is compared to typical 3am volume
     (Case 1 found volume varies ~15x across hours), not typical 6pm volume. Only the positive
     direction is scored (np.clip at 0): an unusually QUIET hour isn't the same kind of signal a
     fraud system cares about the way a sudden burst is, so a lull doesn't count as "anomalous"
-    here. Every transaction in the same (day, hour) block shares the same burst score — this
+    here. Every transaction in the same (day, hour) block shares the same burst score: this
     layer flags suspicious *time windows*, not what's distinctive about one transaction within a
     burst; that distinction is what the other three layers are for.
 """
@@ -54,7 +54,7 @@ def compute_burst_scores(parquet_path: Path) -> pd.DataFrame:
 
 def _hour_history_depth(parquet_path: Path) -> pd.DataFrame:
     """How many prior transactions (causal, ordered by TransactionDT) this row's hour_of_day
-    group had already seen — the same transparency signal entity_anomaly.py reports as
+    group had already seen: the same transparency signal entity_anomaly.py reports as
     history_depth, computed here for the hour segment instead of the card1 entity."""
     df = pq.ParquetFile(parquet_path).read(columns=["TransactionID", "TransactionDT"]).to_pandas()
     df["hour_of_day"] = (df["TransactionDT"] // SECONDS_PER_HOUR) % 24

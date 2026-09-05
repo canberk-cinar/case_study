@@ -1,18 +1,18 @@
-"""Case 3 — context features: how a transaction compares to the distribution of its own context
-segment (product type, hour of day) — not the entity's personal history (entity.py), and not the
+"""Case 3: context features: how a transaction compares to the distribution of its own context
+segment (product type, hour of day): not the entity's personal history (entity.py), and not the
 relationship between entity and context values (relational.py), but where the transaction sits
 relative to everyone else transacting in the same segment at that point in time.
 
 Same causal ("_so_far") discipline as entity.py/relational.py: a segment's running mean/std only
 reflects transactions strictly before the current one, ordered by TransactionDT. Reuses the exact
 "expanding, then shift by one row" pattern from entity.py, grouped by a context segment instead of
-an entity key — no new derivation, just a different groupby column.
+an entity key: no new derivation, just a different groupby column.
 
 Two segments, chosen for being genuinely interpretable rather than an exhaustive scan of every
 possible grouping column:
-  - ProductCD: the transaction's product category (5 values) — Case 1 found this column's
+  - ProductCD: the transaction's product category (5 values): Case 1 found this column's
     identity coverage itself varies drastically by ProductCD, so amount behavior likely does too.
-  - hour_of_day: reuses temporal.py's derivation — Case 1 found a strong fraud-rate/hour
+  - hour_of_day: reuses temporal.py's derivation: Case 1 found a strong fraud-rate/hour
     relationship, so "is this amount unusual for this hour" is a natural next question.
 """
 from pathlib import Path
@@ -30,7 +30,7 @@ def _causal_segment_stats(
     df: pd.DataFrame, segment_col: str, value_col: str, time_col: str
 ) -> tuple[pd.Series, pd.Series, pd.Series]:
     """Returns (prior_mean, prior_std, zscore) for `value_col` within `segment_col` groups,
-    ordered by `time_col` — the same expanding-then-shift mechanism entity.py uses for card1,
+    ordered by `time_col`: the same expanding-then-shift mechanism entity.py uses for card1,
     applied here to a context segment instead of an entity."""
     ordered = df.sort_values([segment_col, time_col])
     grouped = ordered.groupby(segment_col)[value_col]

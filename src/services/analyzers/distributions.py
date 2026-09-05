@@ -1,14 +1,14 @@
-"""Case 1 — distribution analysis over the merged Parquet file.
+"""Case 1: distribution analysis over the merged Parquet file.
 
 Three distinct shapes of "distribution", handled separately because they answer different
 questions and use different math:
   - numeric_continuous / monetary / count columns: percentiles, skew/kurtosis, zero/negative
     ratio, a log-transform recommendation for heavily right-skewed columns.
   - categorical-like columns (categorical, binary_flag, high_cardinality_text, and
-    numeric_encoded_categorical — the latter is numeric-typed but flagged in column_types.py as
+    numeric_encoded_categorical: the latter is numeric-typed but flagged in column_types.py as
     not-safe-to-average, so it belongs here, not in the numeric summary): top-N values, Shannon
     entropy, normalized entropy, imbalance ratio.
-  - TransactionDT: not really a numeric column at all here — it's an offset the competition
+  - TransactionDT: not really a numeric column at all here: it's an offset the competition
     documents as seconds from a reference point, so the useful "distribution" is derived
     day/hour volume and how TransactionAmt (and, descriptively only, isFraud) shifts across them.
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 NUMERIC_SEMANTIC_TYPES = {"numeric_continuous", "monetary", "count"}
 CATEGORICAL_SEMANTIC_TYPES = {"categorical", "binary_flag", "high_cardinality_text", "numeric_encoded_categorical"}
 
-# A right-skewed numeric column past this point is flagged as a log-transform candidate — 2.0 is
+# A right-skewed numeric column past this point is flagged as a log-transform candidate: 2.0 is
 # a common "highly skewed" cutoff (vs. ~0.5-1.0 for "moderately skewed"); log1p needs min >= 0.
 LOG_TRANSFORM_SKEW_THRESHOLD = 2.0
 
@@ -126,9 +126,9 @@ def compute_categorical_distributions(parquet_path: Path, columns: list[str], ba
 
 def analyze_time_distribution(parquet_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     """TransactionDT is seconds elapsed from an undocumented reference point (not a real
-    timestamp) — day/hour are derived by simple integer division, the standard approach for this
+    timestamp): day/hour are derived by simple integer division, the standard approach for this
     dataset. Returns (daily, hourly) volume/amount/fraud-rate tables. isFraud is used here purely
-    descriptively (how the label happens to distribute over time) — never to drive a typing or
+    descriptively (how the label happens to distribute over time): never to drive a typing or
     cleaning decision elsewhere in this pipeline."""
     df = pq.ParquetFile(parquet_path).read(columns=["TransactionDT", "TransactionAmt", "isFraud"]).to_pandas()
     df["day"] = df["TransactionDT"] // SECONDS_PER_DAY
@@ -163,10 +163,10 @@ def run() -> dict:
     categorical_dist = compute_categorical_distributions(parquet_path, categorical_cols)
     daily, hourly = analyze_time_distribution(parquet_path)
 
-    print(f"=== Numeric distributions ({len(numeric_dist)} columns) — top 10 most skewed ===")
+    print(f"=== Numeric distributions ({len(numeric_dist)} columns): top 10 most skewed ===")
     print(numeric_dist.head(10)[["column", "skewness", "kurtosis", "zero_ratio", "log_transform_recommended"]].to_string(index=False))
 
-    print(f"\n=== Categorical distributions ({len(categorical_dist)} columns) — top 10 most imbalanced (lowest normalized entropy) ===")
+    print(f"\n=== Categorical distributions ({len(categorical_dist)} columns): top 10 most imbalanced (lowest normalized entropy) ===")
     print(categorical_dist.head(10)[["column", "nunique", "normalized_entropy", "imbalance_ratio"]].to_string(index=False))
 
     print("\n=== Daily volume/amount/fraud rate (first 5 days) ===")

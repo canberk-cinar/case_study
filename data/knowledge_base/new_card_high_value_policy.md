@@ -5,7 +5,7 @@ large risk is being taken with no historical data to verify the card's behavior.
 at CRITICAL severity and triggers the block (BLOCK) action.
 
 Additionally, high-value transactions occurring during the weekend and the low-volume hour window
-(04:00-09:00) receive a separate MEDIUM-level flag (FLAG) — based on the observation that
+(04:00-09:00) receive a separate MEDIUM-level flag (FLAG), based on the observation that
 combining two individually weak contextual signals (weekend + low volume) is a stronger risk
 indicator than either alone.
 

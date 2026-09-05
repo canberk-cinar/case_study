@@ -1,21 +1,21 @@
-"""Case 2 — column relationship discovery.
+"""Case 2: column relationship discovery.
 
 Three relationship types, each needing different math and a different column scope:
 
-  - numeric-numeric: Pearson (linear) + Spearman (monotonic, rank-based — catches relationships
+  - numeric-numeric: Pearson (linear) + Spearman (monotonic, rank-based: catches relationships
     Pearson misses on the heavily right-skewed columns Case 1 found) correlation across all 96
     numeric columns at once. Unlike the other analyzers in this package, correlation genuinely
-    needs the full column set loaded together (it's a pairwise, not per-column, statistic) — read
+    needs the full column set loaded together (it's a pairwise, not per-column, statistic): read
     as float32 rather than float64 to roughly halve the ~280MB footprint, checked against this
     machine's RAM budget before running.
   - categorical-categorical: Cramér's V (contingency-table association strength, computed here
-    without a scipy dependency — chi-square from the observed/expected counts directly).
+    without a scipy dependency: chi-square from the observed/expected counts directly).
   - numeric-categorical: eta-squared (how much of a numeric column's variance sits between a
     categorical column's groups vs. within them).
 
 Both categorical-involving checks are restricted to a fixed, documented set of interpretable
 low/moderate-cardinality columns (RELATIONSHIP_CATEGORICAL_COLUMNS) rather than all ~300
-categorical-like columns — same reasoning as rare_combinations.py: scanning all pairs among
+categorical-like columns: same reasoning as rare_combinations.py: scanning all pairs among
 V-family columns would be slow, and would mostly surface expected in-family associations rather
 than genuine cross-domain relationships.
 """

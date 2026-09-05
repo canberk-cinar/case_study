@@ -1,4 +1,4 @@
-"""Repository pattern — CRUD access to the precomputed scoring artifact, same module-level-
+"""Repository pattern: CRUD access to the precomputed scoring artifact, same module-level-
 function style as db_services/artifact.py and db_services/rag.py."""
 import pandas as pd
 from sqlalchemy import delete
@@ -8,7 +8,7 @@ from ..models.scoring import ScoredTransaction
 
 
 def replace_scored_transactions(db: Session, df: pd.DataFrame) -> int:
-    """Wipes the table and bulk-loads `df` — used by the build pipeline to make a rebuild
+    """Wipes the table and bulk-loads `df`: used by the build pipeline to make a rebuild
     idempotent. Deletes rows explicitly (not `if_exists="replace"` on to_sql, which would drop
     and recreate the table, losing the primary key/index) then appends via pandas' bulk insert."""
     db.execute(delete(ScoredTransaction))

@@ -217,8 +217,11 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Case study — raw/processed data and generated reports (large, regenerable)
+# Case study: raw Kaggle competition CSVs stay excluded (652MB train_transaction.csv alone
+# exceeds GitHub's 100MB per-file push limit, and redistributing competition data isn't allowed
+# regardless of size). merged_transactions.parquet and case_study.db ARE committed on purpose,
+# even though a derived/regenerable artifact wouldn't normally be checked in: this is a
+# job-application case study reviewed by one company, not an open-source project with many
+# contributors, so shipping the ready-to-run artifacts directly (no Kaggle account/download
+# needed to see the API and Cases 2-10 work) was judged more valuable here than repo hygiene.
 data/raw/*.csv
-data/processed/
-*.db
-*.sqlite3

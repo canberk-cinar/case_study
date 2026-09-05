@@ -7,7 +7,7 @@ from ..db import Base
 
 
 class Document(Base):
-    """A single knowledge-base document (a fraud/anomaly policy write-up) — the unit a user adds
+    """A single knowledge-base document (a fraud/anomaly policy write-up): the unit a user adds
     or removes, source of truth for its chunks. Small, relational, CRUD-shaped data, which is why
     this knowledge base lives in SQLite rather than Parquet (see src/database/db.py's REPO_ROOT-
     anchored sqlite path)."""
@@ -24,7 +24,7 @@ class Document(Base):
 
 
 class DocumentChunk(Base):
-    """One retrievable unit — a document is split into one or more chunks (chunking.py), each with
+    """One retrievable unit: a document is split into one or more chunks (chunking.py), each with
     its own embedding. `embedding` is stored as raw bytes via numpy.ndarray.tobytes() (float32);
     `embedding_dim` and `embedding_model` are kept alongside so a stored embedding can always be
     reconstructed correctly and never silently mixed with vectors from a different model/dimension

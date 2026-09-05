@@ -1,8 +1,8 @@
-"""Case 3 — relational features: how a transaction's entity (card1) relates to its context
+"""Case 3: relational features: how a transaction's entity (card1) relates to its context
 columns (addr1, DeviceInfo) at the time of the transaction.
 
 Same causal ("_so_far") discipline as entity.py: every feature here reflects only what had
-already happened strictly before the current transaction, ordered by TransactionDT — nothing
+already happened strictly before the current transaction, ordered by TransactionDT: nothing
 here looks at rows after the one being scored (see entity.py's module docstring for why).
 
 Two directions of relationship, both classic fraud signals:
@@ -10,7 +10,7 @@ Two directions of relationship, both classic fraud signals:
     from a brand-new region or device is a common account-takeover signal.
   - context -> card ("how many distinct cards has this address/device been shared by?"): an
     address or device shared across many distinct cards is the classic "drop address" /
-    device-emulator fraud-ring pattern — a much stronger signal than looking at the card alone.
+    device-emulator fraud-ring pattern: a much stronger signal than looking at the card alone.
 
 The running-distinct-count features (addr1_distinct_cards_so_far, ...) are vectorized via a
 "first occurrence" trick rather than a per-row running set: sorted by (context, TransactionDT), a
@@ -33,13 +33,13 @@ def _running_distinct_entity_count(
 ) -> pd.Series:
     """For each row, the number of distinct `entity_col` values seen under this row's
     `context_col` value strictly before this row (causal), ordered by `time_col`. NaN where the
-    row itself has no context value — there's nothing to relate it to."""
+    row itself has no context value: there's nothing to relate it to."""
     ordered = df.sort_values([context_col, time_col])
     has_context = ordered[context_col].notna()
 
     is_first_for_context = ~ordered.duplicated(subset=[context_col, entity_col], keep="first")
     # duplicated() treats NaN == NaN, which would wrongly lump every missing-context row into one
-    # group — force those rows' flag to False so they never contribute to a running count.
+    # group: force those rows' flag to False so they never contribute to a running count.
     is_first_for_context = is_first_for_context.where(has_context, False)
 
     running_inclusive = is_first_for_context.groupby(ordered[context_col]).cumsum()

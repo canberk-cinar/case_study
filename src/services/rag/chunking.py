@@ -1,7 +1,7 @@
-"""Case 8 — chunking: splits a document's text into retrievable units.
+"""Case 8: chunking: splits a document's text into retrievable units.
 
 Kept deliberately simple for this knowledge base's actual shape (short, single-topic policy write-
-ups, a few sentences to a couple of paragraphs each — not long multi-topic documents) — a
+ups, a few sentences to a couple of paragraphs each (not long multi-topic documents)) a
 paragraph-based split, merging short paragraphs up to a target word count so a chunk is neither a
 single sentence-fragment nor a whole multi-topic document. A more sophisticated splitter (sentence-
 boundary-aware, overlapping windows) would be solving a problem this knowledge base doesn't have.

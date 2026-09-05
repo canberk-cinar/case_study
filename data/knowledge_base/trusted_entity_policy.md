@@ -1,4 +1,4 @@
-# Trusted Entity Policy — An Unexpected Finding
+# Trusted Entity Policy: An Unexpected Finding
 
 The naive expectation was that a card with a long transaction history would be more trustworthy,
 and its score could therefore be dampened. However, data analysis showed the EXACT OPPOSITE: while
@@ -7,7 +7,7 @@ reach the highest fraud rate (3.91%).
 
 A likely explanation is that the card identifier, at this scale, represents a shared "bucket"
 value rather than a single real customer. Because of this, a naive correction based on the
-"long history = trust" assumption ACTUALLY MADE the system's performance WORSE when tested — it
+"long history = trust" assumption ACTUALLY MADE the system's performance WORSE when tested: it
 disrupted the ranking of the top risk bucket. A fraud-rate-calibrated correction in the opposite
 direction produced the correct result instead.
 

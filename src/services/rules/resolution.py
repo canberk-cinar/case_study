@@ -1,21 +1,21 @@
-"""Case 7 — Chain of Responsibility: reduces a ROW's set of already-fired rules down to one final
-verdict. This is deliberately the ONLY place in the engine that short-circuits — rule evaluation
+"""Case 7: Chain of Responsibility: reduces a ROW's set of already-fired rules down to one final
+verdict. This is deliberately the ONLY place in the engine that short-circuits: rule evaluation
 itself (engine.py) stays exhaustive over every rule so explainability can report everything that
 fired; only the final-verdict step chains through handlers and stops at the first one that
 matches, the classic CoR shape.
 
-Each handler asks one question — "is there a fired rule of exactly this severity?" — and either
+Each handler asks one question ("is there a fired rule of exactly this severity?") and either
 returns a Verdict (stopping the chain) or passes to the next handler. Order is fixed
 CRITICAL -> HIGH -> MEDIUM -> LOW -> none-fired, mirroring Severity's own ordering. When several
-fired rules share the winning severity, `priority` (lower = takes precedence) breaks the tie —
+fired rules share the winning severity, `priority` (lower = takes precedence) breaks the tie,
 keeping "priority" and "severity" doing two visibly different jobs, as the case brief asks for.
 
 `resolve_by_priority` is a second, deliberately simpler resolution strategy, kept alongside the
-severity-driven Chain of Responsibility for comparison rather than replacing it — the same
+severity-driven Chain of Responsibility for comparison rather than replacing it: the same
 "compare, don't just pick one" instinct used throughout this project (Case 4's Mahalanobis vs
 Isolation Forest, Case 5's equal vs redundancy-adjusted weights, Case 6's every context
 adjustment). It ignores severity entirely and picks whichever fired rule has the lowest priority
-number, full stop — the notebook measures how often this agrees or disagrees with the CoR verdict,
+number, full stop: the notebook measures how often this agrees or disagrees with the CoR verdict,
 which is what makes "priority" a real, independently-testable mechanism rather than just a tie-
 breaker nobody can see the effect of.
 """
@@ -56,6 +56,6 @@ def build_default_resolution_chain() -> SeverityHandler:
 
 def resolve_by_priority(fired_rules: list[Rule]) -> Rule | None:
     """Alternative, non-CoR resolution: the single fired rule with the lowest priority number,
-    severity ignored entirely. Not used by RuleEngine's default verdict — exists so the notebook
+    severity ignored entirely. Not used by RuleEngine's default verdict: exists so the notebook
     can compare it against the severity-driven Chain of Responsibility verdict."""
     return min(fired_rules, key=lambda r: r.priority) if fired_rules else None

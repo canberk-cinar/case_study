@@ -1,19 +1,19 @@
-"""Case 1 — automatic column typing over the merged Parquet file.
+"""Case 1: automatic column typing over the merged Parquet file.
 
 Two layers, kept explicitly separate rather than collapsed into one guess:
 
-  1. Statistical base classification — physical dtype, cardinality, integer-valuedness, dominant-
+  1. Statistical base classification: physical dtype, cardinality, integer-valuedness, dominant-
      value ratio. Defensible on any dataset, no prior knowledge of this schema required. This is
      what catches the case naive profiling tools usually miss: an int-typed column with few
      distinct values relative to row count (card1, addr1, ...) is a categorical code, not a
-     quantity — averaging it would be meaningless even though pandas reports it as numeric.
-  2. Domain-hint refinement — a small, explicitly separate table of exact-name and name-pattern
+     quantity: averaging it would be meaningless even though pandas reports it as numeric.
+  2. Domain-hint refinement: a small, explicitly separate table of exact-name and name-pattern
      overrides (isFraud -> target, TransactionDT -> timestamp_offset, C1..C14 -> count,
      TransactionAmt -> monetary). These come from knowing the IEEE-CIS schema, not from column
      statistics, and are documented as a distinct pass so the boundary between "inferred from data"
      and "asserted from domain knowledge" stays visible.
 
-Reads in column batches, not the full 434-column frame at once — same reasoning as
+Reads in column batches, not the full 434-column frame at once: same reasoning as
 missingness.py: peak memory stays bounded to one batch width regardless of the file's column
 count, which matters on this machine's constrained RAM budget.
 """
@@ -87,7 +87,7 @@ def profile_columns(parquet_path: Path, batch_size: int = 25) -> pd.DataFrame:
 
 
 def classify_statistical(row: pd.Series) -> str:
-    """Base semantic type from statistics alone — no column-name knowledge."""
+    """Base semantic type from statistics alone: no column-name knowledge."""
     dtype = row["physical_dtype"]
     is_numeric = dtype.startswith(("int", "float"))
     nunique = row["nunique"]
